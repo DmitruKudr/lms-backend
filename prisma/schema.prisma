@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,18 +7,168 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+// ========================= base entities =========================
+
+model base_entity {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@ignore
 }
 
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
-  authorId  Int
+model status_entity {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  status    BaseStatusesEnum @default(Active)
+
+  @@ignore
+}
+
+enum BaseStatusesEnum {
+  Active
+  Archived
+}
+
+// ========================= users =========================
+
+// ===== user roles =====
+
+model UserRole {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  status    BaseStatusesEnum @default(Active)
+
+  title       String
+  permissions UserPermissionsEnum[]
+  type        UserRoleTypesEnum
+
+  user User[]
+
+  @@map("user_roles")
+}
+
+enum UserRoleTypesEnum {
+  Admin
+  SuperAdmin
+  Parent
+  Student
+  SelfStudent
+  Teacher
+  TestCreator
+}
+
+enum UserPermissionsEnum {
+  All
+  GetUsers
+  GetTests
+}
+
+// ===== users =====
+
+model User {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  status    BaseStatusesEnum @default(Active)
+
+  name     String
+  username String  @unique
+  email    String  @unique
+  password String
+  avatar   String?
+  link     String? @unique
+
+  role   UserRole @relation(fields: [roleId], references: [id])
+  roleId String
+
+  parent  Parent?
+  student Student?
+  teacher Teacher?
+
+  @@map("users")
+}
+
+// ===== parents =====
+
+model Parent {
+  id   String  @id @unique
+  post String?
+
+  user User @relation(fields: [id], references: [id])
+
+  students Student[]
+
+  @@map("parent")
+}
+
+// ===== students =====
+
+model Student {
+  id          String    @id @unique
+  institution String?
+  birthDate   DateTime? @map("birth_date")
+
+  user User @relation(fields: [id], references: [id])
+
+  parents  Parent[]
+  teachers Teacher[]
+
+  @@map("students")
+}
+
+// ===== parents =====
+
+model Teacher {
+  id   String  @id @unique
+  post String?
+
+  user User @relation(fields: [id], references: [id])
+
+  students Student[]
+  groups   Group[]
+  subjects Subject[]
+  tests    Test[]
+
+  @@map("teachers")
+}
+
+// ========================= groups =========================
+
+model Group {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  status    BaseStatusesEnum @default(Active)
+
+  title       String
+  groupStatus GroupStatusesEnum @default(Regular)
+
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
+  teacherId String
+
+  @@map("groups")
+}
+
+enum GroupStatusesEnum {
+  Regular
+  Marked
+  Hidded
+}
+
+// ========================= subjects =========================
+
+model Subject {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  status    BaseStatusesEnum @default(Active)
+
+  title String @unique
+
+  teachers Teacher[]
+
+  @@map("subjects")
 }
