@@ -7,24 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ========================= base entities =========================
-
-model base_entity {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@ignore
-}
-
-model status_entity {
-  id        String           @id @default(uuid())
-  createdAt DateTime         @default(now()) @map("created_at")
-  updatedAt DateTime         @updatedAt @map("updated_at")
-  status    BaseStatusesEnum @default(Active)
-
-  @@ignore
-}
+// ========================= base statuses enum =========================
 
 enum BaseStatusesEnum {
   Active
@@ -101,7 +84,7 @@ model Parent {
 
   Students Student[]
 
-  @@map("parent")
+  @@map("parents")
 }
 
 // ===== students =====
