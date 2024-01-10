@@ -45,7 +45,7 @@ model UserRole {
   permissions UserPermissionsEnum[]
   type        UserRoleTypesEnum
 
-  user User[]
+  Users User[]
 
   @@map("user_roles")
 }
@@ -81,12 +81,12 @@ model User {
   avatar   String?
   link     String? @unique
 
-  role   UserRole @relation(fields: [roleId], references: [id])
-  roleId String
+  Role   UserRole @relation(fields: [roleId], references: [id])
+  roleId String   @map("role_id")
 
-  parent  Parent?
-  student Student?
-  teacher Teacher?
+  Parent  Parent?
+  Student Student?
+  Teacher Teacher?
 
   @@map("users")
 }
@@ -97,9 +97,9 @@ model Parent {
   id   String  @id @unique
   post String?
 
-  user User @relation(fields: [id], references: [id])
+  User User @relation(fields: [id], references: [id])
 
-  students Student[]
+  Students Student[]
 
   @@map("parent")
 }
@@ -111,26 +111,27 @@ model Student {
   institution String?
   birthDate   DateTime? @map("birth_date")
 
-  user User @relation(fields: [id], references: [id])
+  User User @relation(fields: [id], references: [id])
 
-  parents  Parent[]
-  teachers Teacher[]
+  Parents  Parent[]
+  Teachers Teacher[]
 
   @@map("students")
 }
 
-// ===== parents =====
+// ===== teachers =====
 
 model Teacher {
   id   String  @id @unique
   post String?
 
-  user User @relation(fields: [id], references: [id])
+  User User @relation(fields: [id], references: [id])
 
-  students Student[]
-  groups   Group[]
-  subjects Subject[]
-  tests    Test[]
+  Students Student[]
+  Groups   Group[]
+  Subjects Subject[]
+  Tests    Test[]
+  Comments Comment[]
 
   @@map("teachers")
 }
@@ -146,8 +147,8 @@ model Group {
   title       String
   groupStatus GroupStatusesEnum @default(Regular)
 
-  teacher   Teacher @relation(fields: [teacherId], references: [id])
-  teacherId String
+  Teacher   Teacher @relation(fields: [teacherId], references: [id])
+  teacherId String  @map("teacher_id")
 
   @@map("groups")
 }
@@ -155,7 +156,7 @@ model Group {
 enum GroupStatusesEnum {
   Regular
   Marked
-  Hidded
+  Hidden
 }
 
 // ========================= subjects =========================
@@ -168,7 +169,181 @@ model Subject {
 
   title String @unique
 
-  teachers Teacher[]
+  Teachers Teacher[]
+  Tests    Test[]
 
   @@map("subjects")
+}
+
+// ========================= tests =========================
+
+// ===== tests =====
+
+model Test {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  status    BaseStatusesEnum @default(Active)
+
+  title        String
+  testDuration Int?               @map("test_duration")
+  testStatus   TestStatusesEnum[] @default([Hidden, InCreation]) @map("test_status")
+  type         TestTypesEnum[]    @default([SinglePage])
+
+  Subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String  @map("subject_id")
+  Creator   Teacher @relation(fields: [creatorId], references: [id])
+  creatorId String  @map("creator_id")
+
+  TestItems TestItem[]
+  Todos     Todo[]
+
+  @@map("tests")
+}
+
+enum TestStatusesEnum {
+  Open
+  Hidden
+  TeachersOnly
+  InRework
+  InCreation
+}
+
+enum TestTypesEnum {
+  SinglePage
+  MultiPage
+  TextSelectable
+}
+
+// ===== test items =====
+
+model TestItem {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  status    BaseStatusesEnum @default(Active)
+
+  title    String
+  question String?
+  answer   String
+  media    String?
+  points   Int?
+  type     TestItemTypesEnum[]
+
+  Test   Test   @relation(fields: [testId], references: [id])
+  testId String @map("test_id")
+
+  TestItemOptions TestItemOption[]
+  TodoItems       TodoItem[]
+
+  @@map("test_items")
+}
+
+enum TestItemTypesEnum {
+  NoMediaItem
+  ImageItem
+  AudioItem
+  PDFItem
+  TextAnswer
+  NumericaAnswer
+  RadioAnswer
+  CheckboxAnswer
+  TextOptions
+  ImageOptions
+}
+
+// ===== test item options =====
+
+model TestItemOption {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  status    BaseStatusesEnum @default(Active)
+
+  text   String?
+  media  String?
+  points Int?
+
+  TestItem   TestItem @relation(fields: [testItemId], references: [id])
+  testItemId String   @map("test_item_id")
+
+  @@map("test_item_options")
+}
+
+// ========================= todos =========================
+
+// ===== todos =====
+
+model Todo {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  status    BaseStatusesEnum @default(Active)
+
+  todoStatus   TodoStatusesEnum @default(NotStarted) @map("todo_status")
+  startTime    DateTime?        @map("start_time")
+  deadline     DateTime?
+  result       Decimal?
+  todoDuration Int?             @map("todo_duration")
+  autocomments Boolean
+
+  Test   Test   @relation(fields: [testId], references: [id])
+  testId String @map("test_id")
+
+  TodoItems TodoItem[]
+
+  @@map("todos")
+}
+
+enum TodoStatusesEnum {
+  Started
+  NotStarted
+  Complete
+}
+
+// ===== todo items =====
+
+model TodoItem {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  status    BaseStatusesEnum @default(Active)
+
+  studentAnswer String @map("student_answer")
+
+  Todo       Todo     @relation(fields: [todoId], references: [id])
+  todoId     String   @map("todo_id")
+  TestItem   TestItem @relation(fields: [testItemId], references: [id])
+  testItemId String   @map("test_item_id")
+
+  Comments Comment[]
+
+  @@map("todo_items")
+}
+
+// ===== comments =====
+
+model Comment {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+  status    BaseStatusesEnum @default(Active)
+
+  text  String?
+  media String?
+  type  CommentTypesEnum
+
+  Teacher    Teacher  @relation(fields: [teacherId], references: [id])
+  teacherId  String   @map("teacher_id")
+  TodoItem   TodoItem @relation(fields: [todoItemId], references: [id])
+  todoItemId String   @map("todo_item_id")
+
+  @@map("comments")
+}
+
+enum CommentTypesEnum {
+  NoMediaComment
+  ImageComment
+  AudioComment
+  PDFComment
 }
