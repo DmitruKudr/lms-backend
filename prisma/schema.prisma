@@ -12,6 +12,8 @@ datasource db {
 enum BaseStatusesEnum {
   Active
   Archived
+
+  @@map("base_statuses_enum")
 }
 
 // ========================= users =========================
@@ -41,12 +43,16 @@ enum UserRoleTypesEnum {
   SelfStudent
   Teacher
   TestCreator
+
+  @@map("user_role_types_enum")
 }
 
 enum UserPermissionsEnum {
   All
   GetUsers
   GetTests
+
+  @@map("user_permissions_enum")
 }
 
 // ===== users =====
@@ -98,6 +104,7 @@ model Student {
 
   Parents  Parent[]
   Teachers Teacher[]
+  Groups   Group[]
 
   @@map("students")
 }
@@ -133,6 +140,8 @@ model Group {
   Teacher   Teacher @relation(fields: [teacherId], references: [id])
   teacherId String  @map("teacher_id")
 
+  Students Student[]
+
   @@map("groups")
 }
 
@@ -140,6 +149,8 @@ enum GroupStatusesEnum {
   Regular
   Marked
   Hidden
+
+  @@map("group_statuses_enum")
 }
 
 // ========================= subjects =========================
@@ -190,12 +201,16 @@ enum TestStatusesEnum {
   TeachersOnly
   InRework
   InCreation
+
+  @@map("test_statuses_enum")
 }
 
 enum TestTypesEnum {
   SinglePage
   MultiPage
   TextSelectable
+
+  @@map("test_types_enum")
 }
 
 // ===== test items =====
@@ -233,6 +248,8 @@ enum TestItemTypesEnum {
   CheckboxAnswer
   TextOptions
   ImageOptions
+
+  @@map("test_item_types_enum")
 }
 
 // ===== test item options =====
@@ -282,6 +299,8 @@ enum TodoStatusesEnum {
   Started
   NotStarted
   Complete
+
+  @@map("todo_statuses_enum")
 }
 
 // ===== todo items =====
@@ -329,4 +348,6 @@ enum CommentTypesEnum {
   ImageComment
   AudioComment
   PDFComment
+
+  @@map("comment_types_enum")
 }
