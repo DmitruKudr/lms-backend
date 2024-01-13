@@ -357,7 +357,8 @@ model TodoItem {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  studentAnswer String @map("student_answer")
+  studentAnswer String  @map("student_answer")
+  isCorrect     Boolean @map("is_correct")
 
   Todo       Todo     @relation(fields: [todoId], references: [id])
   todoId     String   @map("todo_id")
