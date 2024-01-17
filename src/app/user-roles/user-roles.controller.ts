@@ -21,7 +21,6 @@ import { UserRoleDto } from './dtos/user-role.dto';
 export class UserRolesController {
   constructor(private readonly userRolesService: UserRolesService) {}
 
-  @Post()
   @ApiOperation({ summary: 'Create new user role' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -29,7 +28,9 @@ export class UserRolesController {
     type: UserRoleDto,
     isArray: false,
   })
-  public async create(@Body() form: NewUserRoleForm) {
+  @Post()
+  public async create(@Body() body: NewUserRoleForm) {
+    const form = NewUserRoleForm.from(body);
     const errors = await NewUserRoleForm.validate(form);
     if (errors) {
       throw new BadRequestException({
