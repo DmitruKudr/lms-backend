@@ -53,6 +53,6 @@ export class UserRoleDto extends StatusDto {
   }
 
   public static fromModels(models?: UserRole[]) {
-    return !models?.length ? [] : models.map((model) => this.fromModel(model));
+    return !models?.map ? [] : models.map((model) => this.fromModel(model));
   }
 }

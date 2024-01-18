@@ -25,8 +25,4 @@ export class BaseDto {
 
     return it;
   }
-
-  public static fromModels(models?: BaseDto[]) {
-    return !models?.length ? [] : models.map((model) => this.fromModel(model));
-  }
 }
