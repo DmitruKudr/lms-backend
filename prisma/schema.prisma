@@ -27,7 +27,7 @@ model UserRole {
   status    BaseStatusesEnum @default(Active)
 
   title       String
-  permissions UserPermissionsEnum[]
+  permissions UserRolePermissionsEnum[]
   type        UserRoleTypesEnum
 
   Users User[]
@@ -36,23 +36,23 @@ model UserRole {
 }
 
 enum UserRoleTypesEnum {
-  Admin
-  SuperAdmin
-  Parent
   Student
-  SelfStudent
   Teacher
-  TestCreator
+  Parent
+  Admin
+  // SuperAdmin
+  // SelfStudent
+  // TestCreator
 
   @@map("user_role_types_enum")
 }
 
-enum UserPermissionsEnum {
+enum UserRolePermissionsEnum {
   All
   GetUsers
   GetTests
 
-  @@map("user_permissions_enum")
+  @@map("user__role_permissions_enum")
 }
 
 // ===== users =====
