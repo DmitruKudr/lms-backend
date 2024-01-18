@@ -17,7 +17,7 @@ export class NewUserRoleForm {
   })
   @IsString()
   @MinLength(5)
-  title: string;
+  title!: string;
 
   @ApiProperty({
     description: 'User role permissions',
@@ -30,26 +30,25 @@ export class NewUserRoleForm {
   @ArrayMinSize(1)
   @ArrayUnique()
   @IsEnum(UserRolePermissionsEnum, { each: true })
-  permissions: UserRolePermissionsEnum[];
+  permissions!: UserRolePermissionsEnum[];
 
   @ApiProperty({
     description: 'User role type',
     enum: UserRoleTypesEnum,
   })
   @IsEnum(UserRoleTypesEnum)
-  type: UserRoleTypesEnum;
+  type!: UserRoleTypesEnum;
 
   public static from(form: NewUserRoleForm) {
     const it = new NewUserRoleForm();
     it.title = form.title;
-    it.type = form.type;
     it.permissions = form.permissions;
+    it.type = form.type;
 
     return it;
   }
 
   public static async validate(form: NewUserRoleForm) {
-    console.log(form);
     const errors = await validate(form);
 
     // return errors?.length
