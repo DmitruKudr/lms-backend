@@ -1,34 +1,39 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpStatus,
+  BadRequestException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { SignUpForm } from './dto/sign-up.form';
+import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
-  }
+  @ApiOperation({ summary: 'Sign up with email, name, user role and password' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:201:OK',
+    // type: UserRoleDto,
+  })
+  @Post('sign-up')
+  public async signUp(@Body() body: SignUpForm) {
+    const form = SignUpForm.from(body);
+    const errors = await SignUpForm.validate(form);
+    if (errors) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.InvalidForm,
+        errors,
+      });
+    }
+    const model = await this.authService.signUp(form);
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+    return model;
   }
 }

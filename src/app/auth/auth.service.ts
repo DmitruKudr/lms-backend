@@ -1,26 +1,46 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { SignUpForm } from './dto/sign-up.form';
+import { PrismaService } from '../../prisma.service';
+import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
+  constructor(private prisma: PrismaService) {}
+  public async signUp(form: SignUpForm) {
+    const doesUserExist = await this.prisma.user.findFirst({
+      where: { email: form.email },
+    });
+    if (doesUserExist) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.UserExists,
+      });
+    }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+    const role = await this.prisma.userRole.findFirst({
+      where: { title: form.role },
+    });
+    if (!role) {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: ErrorCodesEnum.NotFound + 'user role',
+      });
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+    const beforeCreation = SignUpForm.beforeCreation(form);
+    const newModel = await this.prisma.user.create({
+      data: {
+        ...beforeCreation,
+        username: beforeCreation.name,
+        roleId: role.id,
+      },
+    });
+    await this.prisma[role.type].create({ data: { id: newModel.id } });
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    return newModel;
   }
 }

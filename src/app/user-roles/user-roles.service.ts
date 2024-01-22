@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UpdateUserRoleForm } from './dtos/update-user-role.form';
 import { PrismaService } from '../../prisma.service';
 import { NewUserRoleForm } from './dtos/new-user-role.form';
@@ -9,6 +13,15 @@ import { BaseStatusesEnum } from '@prisma/client';
 export class UserRolesService {
   constructor(private prisma: PrismaService) {}
   public async create(form: NewUserRoleForm) {
+    const isTitleUnique = await this.prisma.userRole.findFirst({
+      where: { title: form.title },
+    });
+    if (isTitleUnique) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.FieldUnique + 'title',
+      });
+    }
     const newModel = await this.prisma.userRole.create({ data: form });
 
     return newModel;
@@ -28,7 +41,7 @@ export class UserRolesService {
     if (!model) {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound,
+        message: ErrorCodesEnum.NotFound + 'user role',
       });
     }
 
@@ -36,6 +49,16 @@ export class UserRolesService {
   }
 
   public async updateById(id: string, form: UpdateUserRoleForm) {
+    const isTitleUnique = await this.prisma.userRole.findFirst({
+      where: { title: form.title },
+    });
+    if (isTitleUnique) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.FieldUnique + 'title',
+      });
+    }
+
     try {
       const model = await this.prisma.userRole.update({
         where: { id: id },
@@ -46,7 +69,7 @@ export class UserRolesService {
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound,
+        message: ErrorCodesEnum.NotFound + 'user role',
       });
     }
   }
@@ -61,7 +84,7 @@ export class UserRolesService {
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound,
+        message: ErrorCodesEnum.NotFound + 'user role',
       });
     }
   }
@@ -77,7 +100,7 @@ export class UserRolesService {
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound,
+        message: ErrorCodesEnum.NotFound + 'user role',
       });
     }
   }
@@ -93,7 +116,7 @@ export class UserRolesService {
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound,
+        message: ErrorCodesEnum.NotFound + 'user role',
       });
     }
   }

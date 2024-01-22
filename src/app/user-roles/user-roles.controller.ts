@@ -26,7 +26,6 @@ export class UserRolesController {
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
     type: UserRoleDto,
-    isArray: false,
   })
   @Post()
   public async create(@Body() body: NewUserRoleForm) {
@@ -64,7 +63,6 @@ export class UserRolesController {
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
-    isArray: false,
   })
   public async findById(@Param('id') id: string) {
     return await this.userRolesService.findById(id);
@@ -76,7 +74,6 @@ export class UserRolesController {
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
-    isArray: false,
   })
   public async updateById(
     @Param('id') id: string,
@@ -102,7 +99,6 @@ export class UserRolesController {
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
-    isArray: false,
   })
   deleteById(@Param('id') id: string) {
     return this.userRolesService.deleteById(id);
@@ -114,7 +110,6 @@ export class UserRolesController {
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
-    isArray: false,
   })
   activateById(@Param('id') id: string) {
     return this.userRolesService.activateById(id);
@@ -126,7 +121,6 @@ export class UserRolesController {
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
-    isArray: false,
   })
   archiveById(@Param('id') id: string) {
     return this.userRolesService.archiveById(id);
