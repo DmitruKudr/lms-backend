@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { SignUpForm } from './dto/sign-up.form';
+import { SignUpForm } from './dtos/sign-up.form';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 
 @ApiTags('auth')

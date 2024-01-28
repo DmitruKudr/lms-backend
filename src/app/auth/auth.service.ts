@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { SignUpForm } from './dto/sign-up.form';
+import { SignUpForm } from './dtos/sign-up.form';
 import { PrismaService } from '../../prisma.service';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 
@@ -31,11 +31,11 @@ export class AuthService {
       });
     }
 
-    const beforeCreation = SignUpForm.beforeCreation(form);
+    const preparedForm = await SignUpForm.beforeCreation(form);
     const newModel = await this.prisma.user.create({
       data: {
-        ...beforeCreation,
-        username: beforeCreation.name,
+        ...preparedForm,
+        username: preparedForm.name,
         roleId: role.id,
       },
     });

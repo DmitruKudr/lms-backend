@@ -8,6 +8,7 @@ import {
   validate,
 } from 'class-validator';
 import { DefaultRolesEnum } from '../../user-roles/enums/default-roles.enum';
+import { hash } from 'argon2';
 
 export class SignUpForm {
   @ApiProperty({
@@ -67,11 +68,11 @@ export class SignUpForm {
     return it;
   }
 
-  public static beforeCreation(form: SignUpForm) {
+  public static async beforeCreation(form: SignUpForm) {
     const it = new SignUpForm();
     it.name = form.name;
     it.email = form.email;
-    it.password = form.password;
+    it.password = await hash(form.password);
 
     return it;
   }
