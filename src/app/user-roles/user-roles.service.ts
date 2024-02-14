@@ -22,15 +22,12 @@ export class UserRolesService {
         message: ErrorCodesEnum.FieldUnique + 'title',
       });
     }
-    const newModel = await this.prisma.userRole.create({ data: form });
 
-    return newModel;
+    return this.prisma.userRole.create({ data: form });
   }
 
   public async findAll() {
-    const models = await this.prisma.userRole.findMany();
-
-    return models;
+    return this.prisma.userRole.findMany();
   }
 
   public async findById(id: string) {
@@ -60,12 +57,10 @@ export class UserRolesService {
     }
 
     try {
-      const model = await this.prisma.userRole.update({
+      return await this.prisma.userRole.update({
         where: { id: id },
         data: form,
       });
-
-      return model;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
@@ -76,11 +71,9 @@ export class UserRolesService {
 
   public async deleteById(id: string) {
     try {
-      const model = await this.prisma.userRole.delete({
+      return await this.prisma.userRole.delete({
         where: { id: id },
       });
-
-      return model;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
@@ -91,12 +84,10 @@ export class UserRolesService {
 
   public async activateById(id: string) {
     try {
-      const model = await this.prisma.userRole.update({
+      return await this.prisma.userRole.update({
         where: { id: id },
         data: { status: BaseStatusesEnum.Active },
       });
-
-      return model;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
@@ -107,12 +98,10 @@ export class UserRolesService {
 
   public async archiveById(id: string) {
     try {
-      const model = await this.prisma.userRole.update({
+      return await this.prisma.userRole.update({
         where: { id: id },
         data: { status: BaseStatusesEnum.Archived },
       });
-
-      return model;
     } catch {
       throw new NotFoundException({
         statusCode: 404,

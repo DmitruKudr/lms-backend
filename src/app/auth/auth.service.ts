@@ -6,10 +6,14 @@ import {
 import { SignUpForm } from './dtos/sign-up.form';
 import { PrismaService } from '../../prisma.service';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
+import { SecurityService } from '../security/security.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private securityService: SecurityService,
+  ) {}
   public async signUp(form: SignUpForm) {
     const doesUserExist = await this.prisma.user.findFirst({
       where: { email: form.email },
@@ -35,12 +39,12 @@ export class AuthService {
     const newModel = await this.prisma.user.create({
       data: {
         ...preparedForm,
-        username: preparedForm.name,
+        username: preparedForm.name + '123',
         roleId: role.id,
       },
     });
     await this.prisma[role.type].create({ data: { id: newModel.id } });
 
-    return newModel;
+    return await this.securityService.generateTokens(newModel, role);
   }
 }
