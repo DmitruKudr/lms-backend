@@ -21,7 +21,7 @@ export class AuthService {
     if (doesUserExist) {
       throw new BadRequestException({
         statusCode: 400,
-        message: ErrorCodesEnum.UserExists,
+        message: ErrorCodesEnum.UserAlreadyExists,
       });
     }
 

@@ -19,7 +19,7 @@ export class UserRolesService {
     if (isTitleUnique) {
       throw new BadRequestException({
         statusCode: 400,
-        message: ErrorCodesEnum.FieldUnique + 'title',
+        message: ErrorCodesEnum.UniqueField + 'title',
       });
     }
 
@@ -52,7 +52,7 @@ export class UserRolesService {
     if (isTitleUnique) {
       throw new BadRequestException({
         statusCode: 400,
-        message: ErrorCodesEnum.FieldUnique + 'title',
+        message: ErrorCodesEnum.UniqueField + 'title',
       });
     }
 
