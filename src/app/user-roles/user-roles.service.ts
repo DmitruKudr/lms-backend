@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UpdateUserRoleForm } from './dtos/update-user-role.form';
 import { PrismaService } from '../../prisma.service';
 import { NewUserRoleForm } from './dtos/new-user-role.form';
@@ -9,15 +13,21 @@ import { BaseStatusesEnum } from '@prisma/client';
 export class UserRolesService {
   constructor(private prisma: PrismaService) {}
   public async create(form: NewUserRoleForm) {
-    const newModel = await this.prisma.userRole.create({ data: form });
+    const isTitleUnique = await this.prisma.userRole.findFirst({
+      where: { title: form.title },
+    });
+    if (isTitleUnique) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.UniqueField + 'title',
+      });
+    }
 
-    return newModel;
+    return this.prisma.userRole.create({ data: form });
   }
 
   public async findAll() {
-    const models = await this.prisma.userRole.findMany();
-
-    return models;
+    return this.prisma.userRole.findMany();
   }
 
   public async findById(id: string) {
@@ -28,7 +38,7 @@ export class UserRolesService {
     if (!model) {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound,
+        message: ErrorCodesEnum.NotFound + 'user role',
       });
     }
 
@@ -36,64 +46,66 @@ export class UserRolesService {
   }
 
   public async updateById(id: string, form: UpdateUserRoleForm) {
+    const isTitleUnique = await this.prisma.userRole.findUnique({
+      where: { title: form.title },
+    });
+    if (isTitleUnique) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.UniqueField + 'title',
+      });
+    }
+
     try {
-      const model = await this.prisma.userRole.update({
+      return await this.prisma.userRole.update({
         where: { id: id },
         data: form,
       });
-
-      return model;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound,
+        message: ErrorCodesEnum.NotFound + 'user role',
       });
     }
   }
 
   public async deleteById(id: string) {
     try {
-      const model = await this.prisma.userRole.delete({
+      return await this.prisma.userRole.delete({
         where: { id: id },
       });
-
-      return model;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound,
+        message: ErrorCodesEnum.NotFound + 'user role',
       });
     }
   }
 
   public async activateById(id: string) {
     try {
-      const model = await this.prisma.userRole.update({
+      return await this.prisma.userRole.update({
         where: { id: id },
         data: { status: BaseStatusesEnum.Active },
       });
-
-      return model;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound,
+        message: ErrorCodesEnum.NotFound + 'user role',
       });
     }
   }
 
   public async archiveById(id: string) {
     try {
-      const model = await this.prisma.userRole.update({
+      return await this.prisma.userRole.update({
         where: { id: id },
         data: { status: BaseStatusesEnum.Archived },
       });
-
-      return model;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound,
+        message: ErrorCodesEnum.NotFound + 'user role',
       });
     }
   }

@@ -26,7 +26,7 @@ model UserRole {
   updatedAt DateTime         @updatedAt @map("updated_at")
   status    BaseStatusesEnum @default(Active)
 
-  title       String
+  title       String                    @unique
   permissions UserRolePermissionsEnum[]
   type        UserRoleTypesEnum
 
@@ -49,6 +49,7 @@ enum UserRoleTypesEnum {
 
 enum UserRolePermissionsEnum {
   All
+  ManageUserRoles
   GetUsers
   GetTests
 

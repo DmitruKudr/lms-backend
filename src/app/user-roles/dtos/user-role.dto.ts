@@ -4,6 +4,7 @@ import {
   ArrayUnique,
   IsArray,
   IsEnum,
+  IsLowercase,
   IsString,
   MinLength,
 } from 'class-validator';
@@ -16,11 +17,12 @@ import { StatusDto } from '../../../shared/dtos/status.dto';
 
 export class UserRoleDto extends StatusDto {
   @ApiProperty({
-    description: 'User role title',
+    description: 'User role title (in lowercase)',
     minLength: 5,
   })
   @IsString()
   @MinLength(5)
+  @IsLowercase()
   title!: string;
 
   @ApiProperty({
@@ -53,6 +55,6 @@ export class UserRoleDto extends StatusDto {
   }
 
   public static fromModels(models?: UserRole[]) {
-    return !models?.length ? [] : models.map((model) => this.fromModel(model));
+    return !models?.map ? [] : models.map((model) => this.fromModel(model));
   }
 }

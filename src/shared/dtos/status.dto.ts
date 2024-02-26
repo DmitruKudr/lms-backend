@@ -34,8 +34,4 @@ export class StatusDto {
 
     return it;
   }
-
-  public static fromModels(models?: StatusDto[]) {
-    return !models?.length ? [] : models.map((model) => this.fromModel(model));
-  }
 }

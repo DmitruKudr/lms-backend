@@ -1,15 +1,18 @@
 export enum ErrorCodesEnum {
+  // ===== common =====
   InvalidForm = 'errors.invalid-form',
-  NotFound = 'errors.not-found',
+  UniqueField = 'errors.invalid-form.field-must-be-unique: ',
+  NotFound = 'errors.not-found: ',
 
-  FieldShouldBeString = 'errors.field-invalid.should-be-string',
-  FieldShouldBeNumber = 'errors.field-invalid.should-be-number',
-  FieldShouldBeEnum = 'errors.field-invalid.should-be-enum',
-  FieldShouldBeEmail = 'errors.field-invalid.should-be-email',
+  // ===== auth =====
+  UserAlreadyExists = 'errors.invalid-form.user-already-exists',
+  UserNotExists = 'errors.authorization.user-does-not-exist',
+  UserNotActive = 'errors.authorization.user-is-not-active',
+  NotAuthorized = 'errors.authorization.not-authorized-request',
+  InvalidPassword = 'errors.authorization.invalid-password',
+  InvalidRefresh = 'errors.authorization.invalid-refresh-token',
 
-  NotAuthorizedRequest = 'errors.not-authorized.request',
-
-  InvalidStatus_UserInactive = 'errors.invalid-status.user-inactive',
-
-  NotExists_User = 'errors.not-exists.user',
+  // ===== forbidden =====
+  NotEnoughPermissions = 'errors.forbidden.user-does-not-have-necessary-permissions: ',
+  NotCurrentUser = 'errors.forbidden.not-current-user',
 }

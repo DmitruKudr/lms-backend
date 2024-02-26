@@ -4,6 +4,7 @@ import {
   ArrayUnique,
   IsArray,
   IsEnum,
+  IsLowercase,
   IsString,
   MinLength,
   validate,
@@ -12,11 +13,12 @@ import { UserRolePermissionsEnum, UserRoleTypesEnum } from '@prisma/client';
 
 export class NewUserRoleForm {
   @ApiProperty({
-    description: 'User role title',
+    description: 'User role title (in lowercase)',
     minLength: 5,
   })
   @IsString()
   @MinLength(5)
+  @IsLowercase()
   title!: string;
 
   @ApiProperty({
