@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { PayloadAccessDto } from '../app/security/dtos/payload-access.dto';
+import { PayloadAccessDto } from '../dtos/payload-access.dto';
 
 // export const CurrentUser = createParamDecorator(
 //   (data: (keyof User)[], context: ExecutionContext) => {

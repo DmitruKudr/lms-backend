@@ -4,31 +4,28 @@ import {
   Body,
   HttpStatus,
   BadRequestException,
-  Req,
-  Get,
-  UseGuards,
+  Patch,
+  Put,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignUpForm } from './dtos/sign-up.form';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { JwtTokensDto } from '../security/dtos/jwt-tokens.dto';
-import { JwtPermissionsGuard } from '../security/guards/jwt-permissions.guard';
-import { RequiredPermissions } from '../../decorators/required-permissions.decorator';
-import { UserRolePermissionsEnum } from '@prisma/client';
+import { SignInForm } from './dtos/sign-in.form';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Post('sign-up')
   @ApiOperation({ summary: 'Sign up with email, name, user role and password' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
     type: JwtTokensDto,
   })
-  @Post('sign-up')
   public async signUp(@Body() body: SignUpForm) {
     const form = SignUpForm.from(body);
     const errors = await SignUpForm.validate(form);
@@ -43,18 +40,44 @@ export class AuthController {
     return await this.authService.signUp(form);
   }
 
-  @ApiOperation({ summary: 'Test jwt permissions guard' })
+  @Put('sign-in')
+  @ApiOperation({ summary: 'Sign in with email and password' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
+    type: JwtTokensDto,
   })
-  @Post('test-guard')
-  @UseGuards(JwtPermissionsGuard)
-  @RequiredPermissions(
-    UserRolePermissionsEnum.GetTests,
-    // UserRolePermissionsEnum.GetUsers,
-  )
-  public async testGuard(@Req() req: any) {
-    return 'all cool';
+  public async signIn(@Body() body: SignInForm) {
+    const form = SignInForm.from(body);
+    const errors = await SignInForm.validate(form);
+    if (errors) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.InvalidForm,
+        errors,
+      });
+    }
+
+    return await this.authService.signIn(form);
+  }
+
+  @Patch('get-access-token')
+  @ApiOperation({ summary: 'Get new access token using refresh token' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: String,
+  })
+  public async getAccessToken(@Body() body: { refreshToken: string }) {
+    const refreshToken = body.refreshToken;
+    if (!body || !refreshToken) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.InvalidForm,
+        errors: ['Must contain refresh token'],
+      });
+    }
+
+    return await this.authService.getAccessToken(refreshToken);
   }
 }

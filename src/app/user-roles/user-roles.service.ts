@@ -46,7 +46,7 @@ export class UserRolesService {
   }
 
   public async updateById(id: string, form: UpdateUserRoleForm) {
-    const isTitleUnique = await this.prisma.userRole.findFirst({
+    const isTitleUnique = await this.prisma.userRole.findUnique({
       where: { title: form.title },
     });
     if (isTitleUnique) {

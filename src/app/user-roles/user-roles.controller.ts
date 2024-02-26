@@ -8,6 +8,7 @@ import {
   Delete,
   HttpStatus,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { UserRolesService } from './user-roles.service';
 import { NewUserRoleForm } from './dtos/new-user-role.form';
@@ -15,19 +16,24 @@ import { UserRoleDto } from './dtos/user-role.dto';
 import { UpdateUserRoleForm } from './dtos/update-user-role.form';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
+import { JwtPermissionsGuard } from '../security/guards/jwt-permissions.guard';
+import { RequiredPermissions } from '../security/decorators/required-permissions.decorator';
+import { UserRolePermissionsEnum } from '@prisma/client';
 
 @ApiTags('user-roles')
 @Controller('user-roles')
 export class UserRolesController {
   constructor(private readonly userRolesService: UserRolesService) {}
 
+  @Post()
   @ApiOperation({ summary: 'Create new user role' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
     type: UserRoleDto,
   })
-  @Post()
+  @UseGuards(JwtPermissionsGuard)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
   public async create(@Body() body: NewUserRoleForm) {
     const form = NewUserRoleForm.from(body);
     const errors = await NewUserRoleForm.validate(form);
@@ -51,6 +57,8 @@ export class UserRolesController {
     type: UserRoleDto,
     isArray: true,
   })
+  @UseGuards(JwtPermissionsGuard)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
   public async findAll() {
     const models = await this.userRolesService.findAll();
 
@@ -64,6 +72,8 @@ export class UserRolesController {
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
   })
+  @UseGuards(JwtPermissionsGuard)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
   public async findById(@Param('id') id: string) {
     return await this.userRolesService.findById(id);
   }
@@ -75,6 +85,8 @@ export class UserRolesController {
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
   })
+  @UseGuards(JwtPermissionsGuard)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
   public async updateById(
     @Param('id') id: string,
     @Body() body: UpdateUserRoleForm,
@@ -100,6 +112,8 @@ export class UserRolesController {
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
   })
+  @UseGuards(JwtPermissionsGuard)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
   deleteById(@Param('id') id: string) {
     return this.userRolesService.deleteById(id);
   }
@@ -111,6 +125,8 @@ export class UserRolesController {
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
   })
+  @UseGuards(JwtPermissionsGuard)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
   activateById(@Param('id') id: string) {
     return this.userRolesService.activateById(id);
   }
@@ -122,6 +138,8 @@ export class UserRolesController {
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
   })
+  @UseGuards(JwtPermissionsGuard)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
   archiveById(@Param('id') id: string) {
     return this.userRolesService.archiveById(id);
   }

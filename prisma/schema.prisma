@@ -49,6 +49,7 @@ enum UserRoleTypesEnum {
 
 enum UserRolePermissionsEnum {
   All
+  ManageUserRoles
   GetUsers
   GetTests
 

@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   CanActivate,
   ForbiddenException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserRolePermissionsEnum } from '@prisma/client';
@@ -34,6 +35,16 @@ export class JwtPermissionsGuard
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   handleRequest(err: Error, payload: PayloadAccessDto) {
+    if (err || !payload) {
+      throw (
+        err ||
+        new UnauthorizedException({
+          statusCode: 401,
+          message: ErrorCodesEnum.NotAuthorized,
+        })
+      );
+    }
+
     if (isEmpty(this.permissions)) {
       return payload;
     }
