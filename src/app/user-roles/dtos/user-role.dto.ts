@@ -18,7 +18,6 @@ import { StatusDto } from '../../../shared/dtos/status.dto';
 export class UserRoleDto extends StatusDto {
   @ApiProperty({
     description: 'User role title (in lowercase)',
-    minLength: 5,
   })
   @IsString()
   @MinLength(5)

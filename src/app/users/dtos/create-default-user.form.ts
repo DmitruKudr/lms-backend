@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsEnum,
+  IsOptional,
   IsString,
   Length,
   Matches,
@@ -9,14 +10,16 @@ import {
 } from 'class-validator';
 import { DefaultRolesEnum } from '../../security/enums/default-roles.enum';
 import { hash } from 'argon2';
+import { CreateUserForms } from '../types/create-user-forms.type';
 
-export class SignUpForm {
+export class CreateDefaultUserForm {
   @ApiProperty({
     description: 'User name',
     minLength: 6,
     maxLength: 40,
     pattern: '^((?:[А-ЯЁ][а-яё]+|[A-Z][a-z]+)(?:\\s|$)){2,3}$',
     example: 'John Doe Junior',
+    required: false,
   })
   @IsString()
   @Length(6, 40, { message: 'name must be 6-40 characters long' })
@@ -26,7 +29,8 @@ export class SignUpForm {
       'each word must start with a capital letter, ' +
       'name must not contain digits',
   })
-  name!: string;
+  @IsOptional()
+  name: string;
 
   @ApiProperty({
     description: 'User email',
@@ -58,9 +62,9 @@ export class SignUpForm {
   @IsEnum(DefaultRolesEnum)
   role!: DefaultRolesEnum;
 
-  public static from(form: SignUpForm) {
-    const it = new SignUpForm();
-    it.name = form.name;
+  public static from(form: CreateDefaultUserForm) {
+    const it = new CreateDefaultUserForm();
+    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.role);
     it.email = form.email;
     it.password = form.password;
     it.role = form.role;
@@ -68,18 +72,25 @@ export class SignUpForm {
     return it;
   }
 
-  public static async beforeCreation(form: SignUpForm) {
-    const it = new SignUpForm();
-    it.name = form.name;
+  public static async beforeCreation(form: CreateUserForms) {
+    const it = new CreateDefaultUserForm();
+    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.role);
     it.email = form.email;
     it.password = await hash(form.password);
 
     return it;
   }
 
-  public static async validate(form: SignUpForm) {
+  public static async validate(form: CreateDefaultUserForm) {
     const errors = await validate(form);
 
     return errors?.length ? errors : null;
+  }
+
+  private static capitalizeFirstLetters(str: string) {
+    return str
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 }

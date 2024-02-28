@@ -17,7 +17,7 @@ export class BaseDto {
   })
   updatedAt!: Date;
 
-  public static fromModel(model: BaseDto) {
+  public static fromModel(model: BaseDto, ...args: any[]) {
     const it = new BaseDto();
     it.id = model.id;
     it.createdAt = model.createdAt;

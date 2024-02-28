@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -79,6 +80,55 @@ export class SecurityService {
         expiresIn: '1h',
       },
     );
+  }
+
+  public async generateUsername(name: string) {
+    const username = name.toLowerCase().split(' ').join('');
+    const users = await this.prisma.user.findMany({
+      where: { username: { contains: username } },
+    });
+
+    if (users.length) {
+      const tails: number[] = [];
+      for (let i = 0; i < users.length; i++) {
+        const tail = Number(users[i].username.split(username)[1]);
+        isNaN(tail)
+          ? tails.push(tails.sort((a, b) => b - a)[0])
+          : tails.push(tail);
+      }
+
+      return username + (tails.sort((a, b) => b - a)[0] + 1);
+    }
+
+    return username;
+  }
+
+  public async doesUserExist(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: email },
+    });
+    if (user) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.UserAlreadyExists,
+      });
+    }
+
+    return user;
+  }
+
+  public async findRoleWithTitle(title: string) {
+    const role = await this.prisma.userRole.findFirst({
+      where: { title: title },
+    });
+    if (!role) {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: ErrorCodesEnum.NotFound + 'user role',
+      });
+    }
+
+    return role;
   }
 
   public async getUserById(id: string) {

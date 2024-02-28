@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserRolesService } from './user-roles.service';
-import { NewUserRoleForm } from './dtos/new-user-role.form';
+import { CreateUserRoleForm } from './dtos/create-user-role.form';
 import { UserRoleDto } from './dtos/user-role.dto';
 import { UpdateUserRoleForm } from './dtos/update-user-role.form';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -34,9 +34,9 @@ export class UserRolesController {
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
-  public async create(@Body() body: NewUserRoleForm) {
-    const form = NewUserRoleForm.from(body);
-    const errors = await NewUserRoleForm.validate(form);
+  public async create(@Body() body: CreateUserRoleForm) {
+    const form = CreateUserRoleForm.from(body);
+    const errors = await CreateUserRoleForm.validate(form);
     if (errors) {
       throw new BadRequestException({
         statusCode: 400,
@@ -66,7 +66,7 @@ export class UserRolesController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Find user role by id' })
+  @ApiOperation({ summary: 'Find user role with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
@@ -79,7 +79,7 @@ export class UserRolesController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update user role by id' })
+  @ApiOperation({ summary: 'Update user role with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
@@ -106,7 +106,7 @@ export class UserRolesController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete user role by id' })
+  @ApiOperation({ summary: 'Delete user role with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
@@ -119,7 +119,7 @@ export class UserRolesController {
   }
 
   @Patch('activate/:id')
-  @ApiOperation({ summary: 'Activate user role by id' })
+  @ApiOperation({ summary: 'Activate user role with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
@@ -132,7 +132,7 @@ export class UserRolesController {
   }
 
   @Delete('archive/:id')
-  @ApiOperation({ summary: 'Archive user role by id' })
+  @ApiOperation({ summary: 'Archive user role with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',

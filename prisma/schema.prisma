@@ -48,12 +48,44 @@ enum UserRoleTypesEnum {
 }
 
 enum UserRolePermissionsEnum {
+  // ===== super admins =====
   All
+  CreateAdmins
+  ManageAdmins
   ManageUserRoles
-  GetUsers
-  GetTests
+  ChangeRolesOfUsers
+  ArhiveUsers
+  ActivateUsers
+  // ===== admins =====
+  CreateUsers
+  CreateTests
+  CreateTodos
+  CreateGroups
+  CreateComments
+  ManageUsers
+  ManageTests
+  ManageTodos
+  ManageGroups
+  ManageComments
+  GetAllUsers
+  GetAllTests
+  GetAllTodos
+  GetAllGroups
+  GetAllComments
+  // ===== users =====
+  CreateMyTests
+  CreateMyGroups
+  CreateTodosForMyself
+  CreateCommentsForMyStudents
+  ManageMyProfile
+  ManageMyTests
+  ManageMyTodos
+  ManageMyStudentsTodos
+  AddStudents
+  AddTeachers
+  AddParents
 
-  @@map("user__role_permissions_enum")
+  @@map("user_role_permissions_enum")
 }
 
 // ===== users =====
