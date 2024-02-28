@@ -1,7 +1,7 @@
-import { User } from '@prisma/client';
+import { UserRoleTypesEnum } from '@prisma/client';
 import { StatusDto } from '../../../shared/dtos/status.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID } from 'class-validator';
+import { UserWithRole } from '../types/user-with-role.interface';
 
 export class UserDto extends StatusDto {
   @ApiProperty({
@@ -24,6 +24,7 @@ export class UserDto extends StatusDto {
 
   @ApiProperty({
     description: 'User password',
+    example: 'qwerty12',
     required: false,
   })
   password?: string;
@@ -32,17 +33,36 @@ export class UserDto extends StatusDto {
     description: 'User role id',
     format: 'uuid',
   })
-  @IsUUID()
   roleId!: string;
 
-  public static fromModel(model: User, password: string) {
-    const it = super.fromModel(model) as UserDto;
-    it.name = model.name;
-    it.username = model.username;
-    it.email = model.email;
-    it.password = password;
-    it.roleId = model.roleId;
+  @ApiProperty({
+    description: 'User role title',
+    example: 'default parent',
+  })
+  roleTitle!: string;
+
+  @ApiProperty({
+    description: 'User role type',
+    enum: UserRoleTypesEnum,
+  })
+  roleType!: UserRoleTypesEnum;
+
+  public static fromModel(userAndRole: UserWithRole, password?: string) {
+    const it = super.fromModel(userAndRole) as UserDto;
+    it.name = userAndRole.name;
+    it.username = userAndRole.username;
+    it.email = userAndRole.email;
+    password && (it.password = password);
+    it.roleId = userAndRole.roleId;
+
+    it.roleTitle = userAndRole.UserRole.title;
+    it.roleType = userAndRole.UserRole.type;
 
     return it;
+  }
+  public static fromModels(userWithRoleList: UserWithRole[]) {
+    return !userWithRoleList?.map
+      ? []
+      : userWithRoleList.map((userWithRole) => this.fromModel(userWithRole));
   }
 }

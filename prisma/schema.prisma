@@ -50,28 +50,29 @@ enum UserRoleTypesEnum {
 enum UserRolePermissionsEnum {
   // ===== super admins =====
   All
+  CreateSpecialUsers
   CreateAdmins
+  ManageUsers
   ManageAdmins
   ManageUserRoles
-  ChangeRolesOfUsers
-  ArhiveUsers
+  ArchiveUsers
   ActivateUsers
   // ===== admins =====
-  CreateUsers
+  CreateDefaultUsers
   CreateTests
   CreateTodos
   CreateGroups
   CreateComments
-  ManageUsers
+  ManageUserProfiles
   ManageTests
   ManageTodos
   ManageGroups
   ManageComments
-  GetAllUsers
-  GetAllTests
-  GetAllTodos
-  GetAllGroups
-  GetAllComments
+  FindAllUsers
+  FindAllTests
+  FindAllTodos
+  FindAllGroups
+  FindAllComments
   // ===== users =====
   CreateMyTests
   CreateMyGroups
@@ -103,8 +104,8 @@ model User {
   avatar   String?
   link     String? @unique
 
-  Role   UserRole @relation(fields: [roleId], references: [id])
-  roleId String   @map("role_id")
+  UserRole UserRole @relation(fields: [roleId], references: [id])
+  roleId   String   @map("role_id")
 
   Parent  Parent?
   Student Student?

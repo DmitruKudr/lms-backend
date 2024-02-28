@@ -5,6 +5,7 @@ import { SecurityService } from '../security/security.service';
 import { CreateSpecialUserForm } from './dtos/create-special-user.form';
 import { UserRoleTypesEnum } from '@prisma/client';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
+import { UserWithRole } from './types/user-with-role.interface';
 
 type CreateUserForms = CreateDefaultUserForm | CreateSpecialUserForm;
 @Injectable()
@@ -36,6 +37,27 @@ export class UsersService {
     });
     await this.prisma[role.type].create({ data: { id: newModel.id } });
 
-    return newModel;
+    return {
+      ...newModel,
+      UserRole: {
+        title: role.title,
+        type: role.type,
+      },
+    } as UserWithRole;
+  }
+
+  public async getAllUsers() {
+    const models = await this.prisma.user.findMany({
+      where: {
+        UserRole: {
+          type: { not: UserRoleTypesEnum.Admin },
+        },
+      },
+      include: {
+        UserRole: { select: { title: true, type: true } },
+      },
+    });
+
+    return models as UserWithRole[];
   }
 }

@@ -1,14 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  ArrayMinSize,
-  ArrayUnique,
-  IsArray,
-  IsEnum,
-  IsLowercase,
-  IsString,
-  MinLength,
-} from 'class-validator';
-import {
   UserRole,
   UserRolePermissionsEnum,
   UserRoleTypesEnum,
@@ -19,9 +10,6 @@ export class UserRoleDto extends StatusDto {
   @ApiProperty({
     description: 'User role title (in lowercase)',
   })
-  @IsString()
-  @MinLength(5)
-  @IsLowercase()
   title!: string;
 
   @ApiProperty({
@@ -31,17 +19,12 @@ export class UserRoleDto extends StatusDto {
     uniqueItems: true,
     enum: UserRolePermissionsEnum,
   })
-  @IsArray()
-  @ArrayMinSize(1)
-  @ArrayUnique()
-  @IsEnum(UserRolePermissionsEnum, { each: true })
   permissions!: UserRolePermissionsEnum[];
 
   @ApiProperty({
     description: 'User role type',
     enum: UserRoleTypesEnum,
   })
-  @IsEnum(UserRoleTypesEnum)
   type!: UserRoleTypesEnum;
 
   public static fromModel(model: UserRole) {

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
   UseGuards,
@@ -29,7 +30,7 @@ export class UsersController {
     type: UserDto,
   })
   @UseGuards(JwtPermissionsGuard)
-  @RequiredPermissions(UserRolePermissionsEnum.CreateUsers)
+  @RequiredPermissions(UserRolePermissionsEnum.CreateDefaultUsers)
   public async createDefaultUser(@Body() body: CreateDefaultUserForm) {
     const form = CreateDefaultUserForm.from(body);
     const errors = await CreateDefaultUserForm.validate(form);
@@ -53,7 +54,7 @@ export class UsersController {
     type: UserDto,
   })
   @UseGuards(JwtPermissionsGuard)
-  @RequiredPermissions(UserRolePermissionsEnum.CreateAdmins)
+  @RequiredPermissions(UserRolePermissionsEnum.CreateSpecialUsers)
   public async createSpecialUser(@Body() body: CreateSpecialUserForm) {
     const form = CreateSpecialUserForm.from(body);
     const errors = await CreateSpecialUserForm.validate(form);
@@ -67,5 +68,21 @@ export class UsersController {
     const model = await this.usersService.createUser(form);
 
     return UserDto.fromModel(model, form.password);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Find all users' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: UserDto,
+    isArray: true,
+  })
+  @UseGuards(JwtPermissionsGuard)
+  @RequiredPermissions(UserRolePermissionsEnum.FindAllUsers)
+  public async findAllUsers() {
+    const models = await this.usersService.getAllUsers();
+
+    return UserDto.fromModels(models);
   }
 }
