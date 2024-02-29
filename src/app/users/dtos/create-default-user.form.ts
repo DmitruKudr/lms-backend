@@ -8,9 +8,9 @@ import {
   Matches,
   validate,
 } from 'class-validator';
-import { DefaultRolesEnum } from '../../security/enums/default-roles.enum';
+import { DefaultRolesTitlesEnum } from '../../security/enums/default-roles-titles.enum';
 import { hash } from 'argon2';
-import { CreateUserForms } from '../types/create-user-forms.type';
+import { CreateUserFormTypes } from '../types/create-user-forms.type';
 
 export class CreateDefaultUserForm {
   @ApiProperty({
@@ -56,25 +56,25 @@ export class CreateDefaultUserForm {
   password!: string;
 
   @ApiProperty({
-    description: 'User default role',
-    enum: DefaultRolesEnum,
+    description: 'User default role title',
+    enum: DefaultRolesTitlesEnum,
   })
-  @IsEnum(DefaultRolesEnum)
-  role!: DefaultRolesEnum;
+  @IsEnum(DefaultRolesTitlesEnum)
+  roleTitle!: DefaultRolesTitlesEnum;
 
   public static from(form: CreateDefaultUserForm) {
     const it = new CreateDefaultUserForm();
-    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.role);
+    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);
     it.email = form.email;
     it.password = form.password;
-    it.role = form.role;
+    it.roleTitle = form.roleTitle;
 
     return it;
   }
 
-  public static async beforeCreation(form: CreateUserForms) {
+  public static async beforeCreation(form: CreateUserFormTypes) {
     const it = new CreateDefaultUserForm();
-    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.role);
+    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);
     it.email = form.email;
     it.password = await hash(form.password);
 

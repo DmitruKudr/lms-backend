@@ -17,7 +17,7 @@ export class UsersService {
 
   public async createUser(form: CreateUserForms) {
     await this.securityService.doesUserExist(form.email);
-    const role = await this.securityService.findRoleWithTitle(form.role);
+    const role = await this.securityService.findRoleWithTitle(form.roleTitle);
 
     if (role.type === UserRoleTypesEnum.Admin) {
       throw new BadRequestException({
@@ -46,7 +46,7 @@ export class UsersService {
     } as UserWithRole;
   }
 
-  public async getAllUsers() {
+  public async findAllUsers() {
     const models = await this.prisma.user.findMany({
       where: {
         UserRole: {

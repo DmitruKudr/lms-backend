@@ -1,4 +1,4 @@
 import { CreateDefaultUserForm } from '../dtos/create-default-user.form';
 import { CreateSpecialUserForm } from '../dtos/create-special-user.form';
 
-export type CreateUserForms = CreateDefaultUserForm | CreateSpecialUserForm;
+export type CreateUserFormTypes = CreateDefaultUserForm | CreateSpecialUserForm;

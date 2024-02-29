@@ -3,7 +3,7 @@ import { StatusDto } from '../../../shared/dtos/status.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserWithRole } from '../types/user-with-role.interface';
 
-export class UserDto extends StatusDto {
+export class UserWithRoleDto extends StatusDto {
   @ApiProperty({
     description: 'User name',
     example: 'John Doe Junior',
@@ -48,7 +48,7 @@ export class UserDto extends StatusDto {
   roleType!: UserRoleTypesEnum;
 
   public static fromModel(userAndRole: UserWithRole, password?: string) {
-    const it = super.fromModel(userAndRole) as UserDto;
+    const it = super.fromModel(userAndRole) as UserWithRoleDto;
     it.name = userAndRole.name;
     it.username = userAndRole.username;
     it.email = userAndRole.email;

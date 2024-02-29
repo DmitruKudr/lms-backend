@@ -14,7 +14,7 @@ import { RequiredPermissions } from '../security/decorators/required-permissions
 import { UserRolePermissionsEnum } from '@prisma/client';
 import { CreateDefaultUserForm } from './dtos/create-default-user.form';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
-import { UserDto } from './dtos/user.dto';
+import { UserWithRoleDto } from './dtos/user-with-role.dto';
 import { CreateSpecialUserForm } from './dtos/create-special-user.form';
 
 @ApiTags('users')
@@ -27,7 +27,7 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
-    type: UserDto,
+    type: UserWithRoleDto,
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.CreateDefaultUsers)
@@ -43,7 +43,7 @@ export class UsersController {
     }
     const model = await this.usersService.createUser(form);
 
-    return UserDto.fromModel(model, form.password);
+    return UserWithRoleDto.fromModel(model, form.password);
   }
 
   @Post('special-user')
@@ -51,7 +51,7 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
-    type: UserDto,
+    type: UserWithRoleDto,
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.CreateSpecialUsers)
@@ -67,7 +67,7 @@ export class UsersController {
     }
     const model = await this.usersService.createUser(form);
 
-    return UserDto.fromModel(model, form.password);
+    return UserWithRoleDto.fromModel(model, form.password);
   }
 
   @Get()
@@ -75,14 +75,14 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
-    type: UserDto,
+    type: UserWithRoleDto,
     isArray: true,
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.FindAllUsers)
   public async findAllUsers() {
-    const models = await this.usersService.getAllUsers();
+    const models = await this.usersService.findAllUsers();
 
-    return UserDto.fromModels(models);
+    return UserWithRoleDto.fromModels(models);
   }
 }
