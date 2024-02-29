@@ -37,7 +37,7 @@ export class UserWithRoleDto extends StatusDto {
 
   @ApiProperty({
     description: 'User role title',
-    example: 'default parent',
+    example: 'default student',
   })
   roleTitle!: string;
 

@@ -51,12 +51,10 @@ enum UserRolePermissionsEnum {
   // ===== super admins =====
   All
   CreateSpecialUsers
-  CreateAdmins
   ManageUsers
   ManageAdmins
   ManageUserRoles
-  ArchiveUsers
-  ActivateUsers
+  ArchiveEverything
   // ===== admins =====
   CreateDefaultUsers
   CreateTests

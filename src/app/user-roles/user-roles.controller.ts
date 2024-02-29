@@ -9,6 +9,7 @@ import {
   HttpStatus,
   BadRequestException,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { UserRolesService } from './user-roles.service';
 import { CreateUserRoleForm } from './dtos/create-user-role.form';
@@ -75,7 +76,7 @@ export class UserRolesController {
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
   public async findById(@Param('id') id: string) {
-    return await this.userRolesService.findById(id);
+    return await this.userRolesService.findWithId(id);
   }
 
   @Patch(':id')
@@ -100,25 +101,12 @@ export class UserRolesController {
         errors,
       });
     }
-    const model = await this.userRolesService.updateById(id, form);
+    const model = await this.userRolesService.updateWithId(id, form);
 
     return UserRoleDto.fromModel(model);
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete user role with id' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'HttpStatus:200:OK',
-    type: UserRoleDto,
-  })
-  @UseGuards(JwtPermissionsGuard)
-  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
-  deleteById(@Param('id') id: string) {
-    return this.userRolesService.deleteById(id);
-  }
-
-  @Patch('activate/:id')
+  @Put(':id')
   @ApiOperation({ summary: 'Activate user role with id' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -126,12 +114,12 @@ export class UserRolesController {
     type: UserRoleDto,
   })
   @UseGuards(JwtPermissionsGuard)
-  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
+  @RequiredPermissions(UserRolePermissionsEnum.ArchiveEverything)
   activateById(@Param('id') id: string) {
-    return this.userRolesService.activateById(id);
+    return this.userRolesService.activateWithId(id);
   }
 
-  @Delete('archive/:id')
+  @Delete(':id')
   @ApiOperation({ summary: 'Archive user role with id' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -139,8 +127,8 @@ export class UserRolesController {
     type: UserRoleDto,
   })
   @UseGuards(JwtPermissionsGuard)
-  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
+  @RequiredPermissions(UserRolePermissionsEnum.ArchiveEverything)
   archiveById(@Param('id') id: string) {
-    return this.userRolesService.archiveById(id);
+    return this.userRolesService.archiveWithId(id);
   }
 }

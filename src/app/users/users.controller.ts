@@ -2,9 +2,12 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
+  Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -22,8 +25,8 @@ import { CreateSpecialUserForm } from './dtos/create-special-user.form';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('default-user')
-  @ApiOperation({ summary: 'Create new default user' })
+  @Post('default-users')
+  @ApiOperation({ summary: 'Create new default user { temporary }' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
@@ -46,8 +49,8 @@ export class UsersController {
     return UserWithRoleDto.fromModel(model, form.password);
   }
 
-  @Post('special-user')
-  @ApiOperation({ summary: 'Create new special user' })
+  @Post('special-users')
+  @ApiOperation({ summary: 'Create new special user { temporary }' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
@@ -84,5 +87,51 @@ export class UsersController {
     const models = await this.usersService.findAllUsers();
 
     return UserWithRoleDto.fromModels(models);
+  }
+
+  @Get('admins')
+  @ApiOperation({ summary: 'Find all admins' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: UserWithRoleDto,
+    isArray: true,
+  })
+  @UseGuards(JwtPermissionsGuard)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageAdmins)
+  public async findAllAdmins() {
+    const models = await this.usersService.findAllAdmins();
+
+    return UserWithRoleDto.fromModels(models);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Activate user with id' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: UserWithRoleDto,
+  })
+  @UseGuards(JwtPermissionsGuard)
+  @RequiredPermissions(UserRolePermissionsEnum.ArchiveEverything)
+  public async activateWithId(@Param('id') id: string) {
+    const model = await this.usersService.activateWithId(id);
+
+    return UserWithRoleDto.fromModel(model);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Archive user with id' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: UserWithRoleDto,
+  })
+  @UseGuards(JwtPermissionsGuard)
+  @RequiredPermissions(UserRolePermissionsEnum.ArchiveEverything)
+  public async archiveWithId(@Param('id') id: string) {
+    const model = await this.usersService.archiveWithId(id);
+
+    return UserWithRoleDto.fromModel(model);
   }
 }

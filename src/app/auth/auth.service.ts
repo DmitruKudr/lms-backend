@@ -10,25 +10,27 @@ import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { SecurityService } from '../security/security.service';
 import { SignInForm } from './dtos/sign-in.form';
 import { verify } from 'argon2';
+import { UsersService } from '../users/users.service';
+import { UserRolesService } from '../user-roles/user-roles.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private securityService: SecurityService,
+    private usersService: UsersService,
+    private userRolesService: UserRolesService,
   ) {}
 
   public async signUp(form: SignUpForm) {
-    await this.securityService.doesUserExist(form.email);
-    const role = await this.securityService.findRoleWithTitle(form.role);
+    await this.usersService.doesUserExist(form.email);
+    const role = await this.userRolesService.findRoleWithTitle(form.role);
 
     const preparedForm = await SignUpForm.beforeCreation(form);
     const newModel = await this.prisma.user.create({
       data: {
         ...preparedForm,
-        username: await this.securityService.generateUsername(
-          preparedForm.name,
-        ),
+        username: await this.usersService.generateUsername(preparedForm.name),
         roleId: role.id,
       },
     });

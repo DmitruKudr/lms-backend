@@ -30,7 +30,7 @@ export class UserRolesService {
     return this.prisma.userRole.findMany();
   }
 
-  public async findById(id: string) {
+  public async findWithId(id: string) {
     const model = await this.prisma.userRole.findUnique({
       where: { id: id },
     });
@@ -45,7 +45,7 @@ export class UserRolesService {
     return model;
   }
 
-  public async updateById(id: string, form: UpdateUserRoleForm) {
+  public async updateWithId(id: string, form: UpdateUserRoleForm) {
     const isTitleUnique = await this.prisma.userRole.findUnique({
       where: { title: form.title },
     });
@@ -69,20 +69,7 @@ export class UserRolesService {
     }
   }
 
-  public async deleteById(id: string) {
-    try {
-      return await this.prisma.userRole.delete({
-        where: { id: id },
-      });
-    } catch {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: ErrorCodesEnum.NotFound + 'user role',
-      });
-    }
-  }
-
-  public async activateById(id: string) {
+  public async activateWithId(id: string) {
     try {
       return await this.prisma.userRole.update({
         where: { id: id },
@@ -96,7 +83,7 @@ export class UserRolesService {
     }
   }
 
-  public async archiveById(id: string) {
+  public async archiveWithId(id: string) {
     try {
       return await this.prisma.userRole.update({
         where: { id: id },
@@ -108,5 +95,20 @@ export class UserRolesService {
         message: ErrorCodesEnum.NotFound + 'user role',
       });
     }
+  }
+
+  // ===== shared methods =====
+  public async findRoleWithTitle(title: string) {
+    const role = await this.prisma.userRole.findFirst({
+      where: { title: title },
+    });
+    if (!role) {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: ErrorCodesEnum.NotFound + 'user role',
+      });
+    }
+
+    return role;
   }
 }
