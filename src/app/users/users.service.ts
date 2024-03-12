@@ -10,6 +10,7 @@ import { BaseStatusesEnum, UserRoleTypesEnum } from '@prisma/client';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { UserWithRole } from './types/user-with-role.interface';
 import { UserRolesService } from '../user-roles/user-roles.service';
+import { UserQueryDto } from './dtos/user-query.dto';
 
 type CreateUserForms = CreateDefaultUserForm | CreateSpecialUserForm;
 @Injectable()
@@ -49,10 +50,27 @@ export class UsersService {
     } as UserWithRole;
   }
 
-  public async findAllUsers() {
+  public async findActiveUsers(query: UserQueryDto) {
+    const take = query.pageSize || 15;
+    const skip = ((query.pageNumber || 1) - 1) * take;
+
     return (await this.prisma.user.findMany({
-      where: { UserRole: { type: { not: UserRoleTypesEnum.Admin } } },
+      where: {
+        AND: [
+          {
+            OR: [
+              { name: { contains: query.queryLine } },
+              { username: { contains: query.queryLine } },
+            ],
+          },
+          { status: BaseStatusesEnum.Active },
+          query.roleType ? { UserRole: { type: query.roleType } } : {},
+          { UserRole: { type: { not: UserRoleTypesEnum.Admin } } },
+        ],
+      },
       include: { UserRole: { select: { title: true, type: true } } },
+      take: take,
+      skip: skip,
     })) as UserWithRole[];
   }
 

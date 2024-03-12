@@ -8,7 +8,7 @@ import {
   Matches,
   validate,
 } from 'class-validator';
-import { DefaultRolesTitlesEnum } from '../../security/enums/default-roles-titles.enum';
+import { DefaultRoleTitlesEnum } from '../../../shared/enums/default-role-titles.enum';
 import { hash } from 'argon2';
 import { CreateUserFormTypes } from '../types/create-user-forms.type';
 
@@ -57,10 +57,10 @@ export class CreateDefaultUserForm {
 
   @ApiProperty({
     description: 'User default role title',
-    enum: DefaultRolesTitlesEnum,
+    enum: DefaultRoleTitlesEnum,
   })
-  @IsEnum(DefaultRolesTitlesEnum)
-  roleTitle!: DefaultRolesTitlesEnum;
+  @IsEnum(DefaultRoleTitlesEnum)
+  roleTitle!: DefaultRoleTitlesEnum;
 
   public static from(form: CreateDefaultUserForm) {
     const it = new CreateDefaultUserForm();

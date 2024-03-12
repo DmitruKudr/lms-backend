@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -19,6 +20,7 @@ import { CreateDefaultUserForm } from './dtos/create-default-user.form';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { UserWithRoleDto } from './dtos/user-with-role.dto';
 import { CreateSpecialUserForm } from './dtos/create-special-user.form';
+import { UserQueryDto } from './dtos/user-query.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -74,17 +76,15 @@ export class UsersController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Find all users' })
+  @ApiOperation({ summary: 'Find active users' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
     type: UserWithRoleDto,
     isArray: true,
   })
-  @UseGuards(JwtPermissionsGuard)
-  @RequiredPermissions(UserRolePermissionsEnum.FindAllUsers)
-  public async findAllUsers() {
-    const models = await this.usersService.findAllUsers();
+  public async findActiveUsers(@Query() query: UserQueryDto) {
+    const models = await this.usersService.findActiveUsers(query);
 
     return UserWithRoleDto.fromModels(models);
   }

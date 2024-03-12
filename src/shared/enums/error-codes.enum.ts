@@ -18,4 +18,7 @@ export enum ErrorCodesEnum {
 
   // ===== special =====
   InvalidRole = 'errors.invalid-form.role-must-be-not-admin: ',
+
+  // ===== query parameters =====
+  InvalidQueryValue = 'errors.query-parameter.invalid-value-of-parameter: ',
 }

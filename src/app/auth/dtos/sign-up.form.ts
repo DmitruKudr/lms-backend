@@ -7,7 +7,7 @@ import {
   Matches,
   validate,
 } from 'class-validator';
-import { DefaultRolesTitlesEnum } from '../../security/enums/default-roles-titles.enum';
+import { DefaultRoleTitlesEnum } from '../../../shared/enums/default-role-titles.enum';
 import { hash } from 'argon2';
 
 export class SignUpForm {
@@ -53,10 +53,10 @@ export class SignUpForm {
 
   @ApiProperty({
     description: 'User default role',
-    enum: DefaultRolesTitlesEnum,
+    enum: DefaultRoleTitlesEnum,
   })
-  @IsEnum(DefaultRolesTitlesEnum)
-  role!: DefaultRolesTitlesEnum;
+  @IsEnum(DefaultRoleTitlesEnum)
+  role!: DefaultRoleTitlesEnum;
 
   public static from(form: SignUpForm) {
     const it = new SignUpForm();
