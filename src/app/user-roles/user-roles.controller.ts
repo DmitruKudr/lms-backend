@@ -10,6 +10,7 @@ import {
   BadRequestException,
   UseGuards,
   Put,
+  Query,
 } from '@nestjs/common';
 import { UserRolesService } from './user-roles.service';
 import { CreateUserRoleForm } from './dtos/create-user-role.form';
@@ -20,6 +21,7 @@ import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { JwtPermissionsGuard } from '../security/guards/jwt-permissions.guard';
 import { RequiredPermissions } from '../security/decorators/required-permissions.decorator';
 import { UserRolePermissionsEnum } from '@prisma/client';
+import { UserRoleQueryDto } from './dtos/user-role-query.dto';
 
 @ApiTags('user-roles')
 @Controller('user-roles')
@@ -60,8 +62,8 @@ export class UserRolesController {
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
-  public async findAll() {
-    const models = await this.userRolesService.findAll();
+  public async findAll(@Query() query: UserRoleQueryDto) {
+    const models = await this.userRolesService.findAll(query);
 
     return UserRoleDto.fromModels(models);
   }

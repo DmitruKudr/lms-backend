@@ -99,8 +99,8 @@ export class UsersController {
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ManageAdmins)
-  public async findAllAdmins() {
-    const models = await this.usersService.findAllAdmins();
+  public async findAllAdmins(@Query() query: UserQueryDto) {
+    const models = await this.usersService.findAllAdmins(query);
 
     return UserWithRoleDto.fromModels(models);
   }
