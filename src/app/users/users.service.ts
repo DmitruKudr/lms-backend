@@ -11,6 +11,7 @@ import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { UserWithRole } from './types/user-with-role.interface';
 import { UserRolesService } from '../user-roles/user-roles.service';
 import { UserQueryDto } from './dtos/user-query.dto';
+import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
 
 type CreateUserForms = CreateDefaultUserForm | CreateSpecialUserForm;
 @Injectable()
@@ -74,7 +75,7 @@ export class UsersService {
     })) as UserWithRole[];
   }
 
-  public async findAllAdmins(query: UserQueryDto) {
+  public async findAllAdmins(query: BaseQueryDto) {
     const take = query.pageSize || 10;
     const skip = ((query.pageNumber || 1) - 1) * take;
 

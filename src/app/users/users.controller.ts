@@ -21,6 +21,7 @@ import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { UserWithRoleDto } from './dtos/user-with-role.dto';
 import { CreateSpecialUserForm } from './dtos/create-special-user.form';
 import { UserQueryDto } from './dtos/user-query.dto';
+import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -99,7 +100,7 @@ export class UsersController {
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ManageAdmins)
-  public async findAllAdmins(@Query() query: UserQueryDto) {
+  public async findAllAdmins(@Query() query: BaseQueryDto) {
     const models = await this.usersService.findAllAdmins(query);
 
     return UserWithRoleDto.fromModels(models);

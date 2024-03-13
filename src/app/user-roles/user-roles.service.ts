@@ -37,10 +37,8 @@ export class UserRolesService {
 
     return this.prisma.userRole.findMany({
       where: {
-        AND: [
-          { title: { contains: query.queryLine } },
-          { type: query.roleType },
-        ],
+        title: { contains: query.queryLine },
+        type: query.roleType,
       },
       take: take,
       skip: skip,
