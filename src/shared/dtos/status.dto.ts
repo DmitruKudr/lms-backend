@@ -25,7 +25,7 @@ export class StatusDto {
   })
   status!: BaseStatusesEnum;
 
-  public static fromModel(model: StatusDto) {
+  public static fromModel(model: StatusDto, ...args: any[]) {
     const it = new StatusDto();
     it.id = model.id;
     it.createdAt = model.createdAt;

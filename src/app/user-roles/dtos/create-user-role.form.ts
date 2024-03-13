@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { UserRolePermissionsEnum, UserRoleTypesEnum } from '@prisma/client';
 
-export class NewUserRoleForm {
+export class CreateUserRoleForm {
   @ApiProperty({
     description: 'User role title (in lowercase)',
     minLength: 5,
@@ -41,8 +41,8 @@ export class NewUserRoleForm {
   @IsEnum(UserRoleTypesEnum)
   type!: UserRoleTypesEnum;
 
-  public static from(form: NewUserRoleForm) {
-    const it = new NewUserRoleForm();
+  public static from(form: CreateUserRoleForm) {
+    const it = new CreateUserRoleForm();
     it.title = form.title;
     it.permissions = form.permissions;
     it.type = form.type;
@@ -50,7 +50,7 @@ export class NewUserRoleForm {
     return it;
   }
 
-  public static async validate(form: NewUserRoleForm) {
+  public static async validate(form: CreateUserRoleForm) {
     const errors = await validate(form);
 
     // return errors?.length

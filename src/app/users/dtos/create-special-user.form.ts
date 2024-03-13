@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsEnum,
+  IsLowercase,
+  IsOptional,
   IsString,
   Length,
   Matches,
@@ -9,14 +11,16 @@ import {
 } from 'class-validator';
 import { DefaultRoleTitlesEnum } from '../../../shared/enums/default-role-titles.enum';
 import { hash } from 'argon2';
+import { CreateUserFormTypes } from '../types/create-user-forms.type';
 
-export class SignUpForm {
+export class CreateSpecialUserForm {
   @ApiProperty({
     description: 'User name',
     minLength: 6,
     maxLength: 40,
     pattern: '^((?:[А-ЯЁ][а-яё]+|[A-Z][a-z]+)(?:\\s|$)){2,3}$',
     example: 'John Doe Junior',
+    required: false,
   })
   @IsString()
   @Length(6, 40, { message: 'name must be 6-40 characters long' })
@@ -26,7 +30,8 @@ export class SignUpForm {
       'each word must start with a capital letter, ' +
       'name must not contain digits',
   })
-  name!: string;
+  @IsOptional()
+  name: string;
 
   @ApiProperty({
     description: 'User email',
@@ -52,34 +57,42 @@ export class SignUpForm {
   password!: string;
 
   @ApiProperty({
-    description: 'User default role',
-    enum: DefaultRoleTitlesEnum,
+    description: 'User role title (not admin!)',
+    example: 'self student',
   })
-  @IsEnum(DefaultRoleTitlesEnum)
-  role!: DefaultRoleTitlesEnum;
+  @IsString()
+  @IsLowercase()
+  roleTitle!: string;
 
-  public static from(form: SignUpForm) {
-    const it = new SignUpForm();
-    it.name = form.name;
+  public static from(form: CreateSpecialUserForm) {
+    const it = new CreateSpecialUserForm();
+    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);
     it.email = form.email;
     it.password = form.password;
-    it.role = form.role;
+    it.roleTitle = form.roleTitle;
 
     return it;
   }
 
-  public static async beforeCreation(form: SignUpForm) {
-    const it = new SignUpForm();
-    it.name = form.name;
+  public static async beforeCreation(form: CreateUserFormTypes) {
+    const it = new CreateSpecialUserForm();
+    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);
     it.email = form.email;
     it.password = await hash(form.password);
 
     return it;
   }
 
-  public static async validate(form: SignUpForm) {
+  public static async validate(form: CreateSpecialUserForm) {
     const errors = await validate(form);
 
     return errors?.length ? errors : null;
+  }
+
+  private static capitalizeFirstLetters(str: string) {
+    return str
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 }

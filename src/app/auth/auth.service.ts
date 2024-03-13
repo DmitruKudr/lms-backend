@@ -10,39 +10,27 @@ import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { SecurityService } from '../security/security.service';
 import { SignInForm } from './dtos/sign-in.form';
 import { verify } from 'argon2';
+import { UsersService } from '../users/users.service';
+import { UserRolesService } from '../user-roles/user-roles.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private securityService: SecurityService,
+    private usersService: UsersService,
+    private userRolesService: UserRolesService,
   ) {}
-  public async signUp(form: SignUpForm) {
-    const doesUserExist = await this.prisma.user.findUnique({
-      where: { email: form.email },
-    });
-    if (doesUserExist) {
-      throw new BadRequestException({
-        statusCode: 400,
-        message: ErrorCodesEnum.UserAlreadyExists,
-      });
-    }
 
-    const role = await this.prisma.userRole.findFirst({
-      where: { title: form.role },
-    });
-    if (!role) {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: ErrorCodesEnum.NotFound + 'user role',
-      });
-    }
+  public async signUp(form: SignUpForm) {
+    await this.usersService.doesUserExist(form.email);
+    const role = await this.userRolesService.findRoleWithTitle(form.role);
 
     const preparedForm = await SignUpForm.beforeCreation(form);
     const newModel = await this.prisma.user.create({
       data: {
         ...preparedForm,
-        username: await this.generateUsername(preparedForm.name),
+        username: await this.usersService.generateUsername(preparedForm.name),
         roleId: role.id,
       },
     });
@@ -84,26 +72,5 @@ export class AuthService {
 
   public async getAccessToken(refreshToken: string) {
     return await this.securityService.generateAccessToken(refreshToken);
-  }
-
-  private async generateUsername(name: string) {
-    const username = name.toLowerCase().split(' ').join('');
-    const users = await this.prisma.user.findMany({
-      where: { username: { contains: username } },
-    });
-
-    if (users.length) {
-      const tails: number[] = [];
-      for (let i = 0; i < users.length; i++) {
-        const tail = Number(users[i].username.split(username)[1]);
-        isNaN(tail)
-          ? tails.push(tails.sort((a, b) => b - a)[0])
-          : tails.push(tail);
-      }
-
-      return username + (tails.sort((a, b) => b - a)[0] + 1);
-    }
-
-    return username;
   }
 }

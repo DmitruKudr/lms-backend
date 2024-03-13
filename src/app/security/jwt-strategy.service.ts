@@ -46,41 +46,4 @@ export class JwtStrategyService extends PassportStrategy(
 
     return payload;
   }
-
-  // public async validate(payload: PayloadType) {
-  //   try {
-  //     payload instanceof PayloadAccessDto
-  //       ? await this.validateAccess(payload)
-  //       : await this.validateRefresh(payload);
-  //   } catch {
-  //     throw new UnauthorizedException({
-  //       statusCode: 401,
-  //       message: `${ErrorCodesEnum.TokenExpired} or ${ErrorCodesEnum.WrongPayload}`,
-  //     });
-  //   }
-  // }
-  //
-  // private async validateAccess(payload: PayloadAccessDto) {
-  //   const user = await this.securityService.getUserById(payload.id);
-  //
-  //   if (!user) {
-  //     throw new UnauthorizedException({
-  //       statusCode: 401,
-  //       message: ErrorCodesEnum.UserNotExists,
-  //     });
-  //   }
-  //
-  //   if (user.status !== BaseStatusesEnum.Active) {
-  //     throw new UnauthorizedException({
-  //       statusCode: 401,
-  //       message: ErrorCodesEnum.UserNotActive,
-  //     });
-  //   }
-  //
-  //   return user;
-  // }
-  //
-  // private async validateRefresh(payload: PayloadRefreshDto) {
-  //   return 'aboba';
-  // }
 }

@@ -9,9 +9,11 @@ import {
   HttpStatus,
   BadRequestException,
   UseGuards,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { UserRolesService } from './user-roles.service';
-import { NewUserRoleForm } from './dtos/new-user-role.form';
+import { CreateUserRoleForm } from './dtos/create-user-role.form';
 import { UserRoleDto } from './dtos/user-role.dto';
 import { UpdateUserRoleForm } from './dtos/update-user-role.form';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -19,6 +21,7 @@ import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { JwtPermissionsGuard } from '../security/guards/jwt-permissions.guard';
 import { RequiredPermissions } from '../security/decorators/required-permissions.decorator';
 import { UserRolePermissionsEnum } from '@prisma/client';
+import { UserRoleQueryDto } from './dtos/user-role-query.dto';
 
 @ApiTags('user-roles')
 @Controller('user-roles')
@@ -34,9 +37,9 @@ export class UserRolesController {
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
-  public async create(@Body() body: NewUserRoleForm) {
-    const form = NewUserRoleForm.from(body);
-    const errors = await NewUserRoleForm.validate(form);
+  public async create(@Body() body: CreateUserRoleForm) {
+    const form = CreateUserRoleForm.from(body);
+    const errors = await CreateUserRoleForm.validate(form);
     if (errors) {
       throw new BadRequestException({
         statusCode: 400,
@@ -59,14 +62,14 @@ export class UserRolesController {
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
-  public async findAll() {
-    const models = await this.userRolesService.findAll();
+  public async findAll(@Query() query: UserRoleQueryDto) {
+    const models = await this.userRolesService.findAll(query);
 
     return UserRoleDto.fromModels(models);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Find user role by id' })
+  @ApiOperation({ summary: 'Find user role with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
@@ -75,11 +78,11 @@ export class UserRolesController {
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
   public async findById(@Param('id') id: string) {
-    return await this.userRolesService.findById(id);
+    return await this.userRolesService.findWithId(id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update user role by id' })
+  @ApiOperation({ summary: 'Update user role with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
@@ -100,47 +103,34 @@ export class UserRolesController {
         errors,
       });
     }
-    const model = await this.userRolesService.updateById(id, form);
+    const model = await this.userRolesService.updateWithId(id, form);
 
     return UserRoleDto.fromModel(model);
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete user role by id' })
+  @Put(':id')
+  @ApiOperation({ summary: 'Activate user role with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
   })
   @UseGuards(JwtPermissionsGuard)
-  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
-  deleteById(@Param('id') id: string) {
-    return this.userRolesService.deleteById(id);
-  }
-
-  @Patch('activate/:id')
-  @ApiOperation({ summary: 'Activate user role by id' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'HttpStatus:200:OK',
-    type: UserRoleDto,
-  })
-  @UseGuards(JwtPermissionsGuard)
-  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
+  @RequiredPermissions(UserRolePermissionsEnum.ArchiveEverything)
   activateById(@Param('id') id: string) {
-    return this.userRolesService.activateById(id);
+    return this.userRolesService.activateWithId(id);
   }
 
-  @Delete('archive/:id')
-  @ApiOperation({ summary: 'Archive user role by id' })
+  @Delete(':id')
+  @ApiOperation({ summary: 'Archive user role with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HttpStatus:200:OK',
     type: UserRoleDto,
   })
   @UseGuards(JwtPermissionsGuard)
-  @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
+  @RequiredPermissions(UserRolePermissionsEnum.ArchiveEverything)
   archiveById(@Param('id') id: string) {
-    return this.userRolesService.archiveById(id);
+    return this.userRolesService.archiveWithId(id);
   }
 }
