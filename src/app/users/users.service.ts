@@ -55,7 +55,7 @@ export class UsersService {
     const take = query.pageSize || 10;
     const skip = ((query.pageNumber || 1) - 1) * take;
 
-    return (await this.prisma.user.findMany({
+    const models = (await this.prisma.user.findMany({
       where: {
         AND: [
           {
@@ -73,13 +73,32 @@ export class UsersService {
       take: take,
       skip: skip,
     })) as UserWithRole[];
+
+    let remaining = await this.prisma.user.count({
+      where: {
+        AND: [
+          {
+            OR: [
+              { name: { contains: query.queryLine } },
+              { username: { contains: query.queryLine } },
+            ],
+          },
+          { status: BaseStatusesEnum.Active },
+          query.roleType ? { UserRole: { type: query.roleType } } : {},
+          { UserRole: { type: { not: UserRoleTypesEnum.Admin } } },
+        ],
+      },
+    });
+    remaining -= take + skip;
+
+    return remaining > 0 ? { models, remaining } : { models, remaining: 0 };
   }
 
   public async findAllAdmins(query: BaseQueryDto) {
     const take = query.pageSize || 10;
     const skip = ((query.pageNumber || 1) - 1) * take;
 
-    return (await this.prisma.user.findMany({
+    const models = (await this.prisma.user.findMany({
       where: {
         AND: [
           {
@@ -96,6 +115,24 @@ export class UsersService {
       take: take,
       skip: skip,
     })) as UserWithRole[];
+
+    let remaining = await this.prisma.user.count({
+      where: {
+        AND: [
+          {
+            OR: [
+              { name: { contains: query.queryLine } },
+              { username: { contains: query.queryLine } },
+              { email: { contains: query.queryLine } },
+            ],
+          },
+          { UserRole: { type: UserRoleTypesEnum.Admin } },
+        ],
+      },
+    });
+    remaining -= take + skip;
+
+    return remaining > 0 ? { models, remaining } : { models, remaining: 0 };
   }
 
   public async activateWithId(id: string) {

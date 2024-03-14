@@ -4,6 +4,15 @@ export class Parser {
     return isNaN(parsedValue) ? undefined : parsedValue;
   }
 
+  public static toPositiveNumber(value: string): number {
+    const parsedValue = Number.parseInt(value);
+    if (isNaN(parsedValue) || parsedValue <= 0) {
+      return undefined;
+    }
+
+    return parsedValue;
+  }
+
   public static toBoolean(value: string): boolean {
     const parsedValue = value.toLowerCase();
     return parsedValue === 'true' || parsedValue === '1';

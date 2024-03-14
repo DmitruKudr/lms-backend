@@ -7,12 +7,12 @@ export class BaseQueryDto {
   @IsOptional()
   queryLine?: string;
 
-  @Transform(({ value }) => Parser.toNumber(value))
+  @Transform(({ value }) => Parser.toPositiveNumber(value))
   @IsNumber()
   @IsOptional()
   pageNumber?: number;
 
-  @Transform(({ value }) => Parser.toNumber(value))
+  @Transform(({ value }) => Parser.toPositiveNumber(value))
   @IsNumber()
   @IsOptional()
   pageSize?: number;

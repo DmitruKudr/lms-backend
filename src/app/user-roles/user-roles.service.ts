@@ -7,11 +7,7 @@ import { UpdateUserRoleForm } from './dtos/update-user-role.form';
 import { PrismaService } from '../../prisma.service';
 import { CreateUserRoleForm } from './dtos/create-user-role.form';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
-import {
-  BaseStatusesEnum,
-  UserRolePermissionsEnum,
-  UserRoleTypesEnum,
-} from '@prisma/client';
+import { BaseStatusesEnum } from '@prisma/client';
 import { UserRoleQueryDto } from './dtos/user-role-query.dto';
 
 @Injectable()
@@ -35,7 +31,7 @@ export class UserRolesService {
     const take = query.pageSize || 10;
     const skip = ((query.pageNumber || 1) - 1) * take;
 
-    return this.prisma.userRole.findMany({
+    const models = await this.prisma.userRole.findMany({
       where: {
         title: { contains: query.queryLine },
         type: query.roleType,
@@ -43,6 +39,16 @@ export class UserRolesService {
       take: take,
       skip: skip,
     });
+
+    let remaining = await this.prisma.userRole.count({
+      where: {
+        title: { contains: query.queryLine },
+        type: query.roleType,
+      },
+    });
+    remaining -= take + skip;
+
+    return remaining > 0 ? { models, remaining } : { models, remaining: 0 };
   }
 
   public async findWithId(id: string) {

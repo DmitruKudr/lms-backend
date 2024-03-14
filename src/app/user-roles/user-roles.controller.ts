@@ -63,9 +63,9 @@ export class UserRolesController {
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
   public async findAll(@Query() query: UserRoleQueryDto) {
-    const models = await this.userRolesService.findAll(query);
+    const { models, remaining } = await this.userRolesService.findAll(query);
 
-    return UserRoleDto.fromModels(models);
+    return { roles: UserRoleDto.fromModels(models), remaining };
   }
 
   @Get(':id')
