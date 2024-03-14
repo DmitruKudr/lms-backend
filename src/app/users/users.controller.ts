@@ -85,9 +85,11 @@ export class UsersController {
     isArray: true,
   })
   public async findActiveUsers(@Query() query: UserQueryDto) {
-    const models = await this.usersService.findActiveUsers(query);
+    const { models, remaining } = await this.usersService.findActiveUsers(
+      query,
+    );
 
-    return UserWithRoleDto.fromModels(models);
+    return { users: UserWithRoleDto.fromModels(models), remaining };
   }
 
   @Get('admins')
@@ -101,9 +103,9 @@ export class UsersController {
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ManageAdmins)
   public async findAllAdmins(@Query() query: BaseQueryDto) {
-    const models = await this.usersService.findAllAdmins(query);
+    const { models, remaining } = await this.usersService.findAllAdmins(query);
 
-    return UserWithRoleDto.fromModels(models);
+    return { admins: UserWithRoleDto.fromModels(models), remaining };
   }
 
   @Put(':id')
