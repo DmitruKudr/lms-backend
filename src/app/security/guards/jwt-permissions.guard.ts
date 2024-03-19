@@ -19,7 +19,7 @@ export class JwtPermissionsGuard
 {
   protected permissions: UserRolePermissionsEnum[];
 
-  constructor(private reflector: Reflector) {
+  constructor(protected reflector: Reflector) {
     super();
   }
 
@@ -29,6 +29,7 @@ export class JwtPermissionsGuard
         'required_permissions',
         context.getHandler(),
       ) || [];
+
     return super.canActivate(context);
   }
 

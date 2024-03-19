@@ -3,6 +3,7 @@ export enum ErrorCodesEnum {
   InvalidForm = 'errors.invalid-form',
   UniqueField = 'errors.invalid-form.field-must-be-unique: ',
   NotFound = 'errors.not-found: ',
+  InvalidQueryValue = 'errors.query-parameter.invalid-value-of-parameter: ',
 
   // ===== auth =====
   UserAlreadyExists = 'errors.invalid-form.user-already-exists',
@@ -14,11 +15,10 @@ export enum ErrorCodesEnum {
 
   // ===== forbidden =====
   NotEnoughPermissions = 'errors.forbidden.user-does-not-have-necessary-permissions: ',
+  NotEnoughAdminPermissions = 'errors.forbidden.admin-does-not-have-necessary-permissions: ',
+  WrongRole = 'errors.forbidden.user-must-be-one-of-the-following-roles: ',
   NotCurrentUser = 'errors.forbidden.not-current-user',
 
   // ===== special =====
   InvalidRole = 'errors.invalid-form.role-must-be-not-admin: ',
-
-  // ===== query parameters =====
-  InvalidQueryValue = 'errors.query-parameter.invalid-value-of-parameter: ',
 }
