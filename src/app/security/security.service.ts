@@ -4,13 +4,13 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtTokensDto } from './dtos/jwt-tokens.dto';
-import { User, UserRole } from '@prisma/client';
 import { PayloadAccessDto } from './dtos/payload-access.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma.service';
 import { PayloadRefreshDto } from './dtos/payload-refresh.dto';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
+import { IUserWithRole } from '../users/types/user-with-role.interface';
 
 @Injectable()
 export class SecurityService {
@@ -20,7 +20,8 @@ export class SecurityService {
     private prisma: PrismaService,
   ) {}
 
-  public async generateTokens(userModel: User, roleModel: UserRole) {
+  public async generateTokens(userModel: IUserWithRole) {
+    const roleModel = await this.getRoleById(userModel.id);
     const payload = PayloadAccessDto.fromModel(userModel, roleModel);
     const accessToken = await this.jwtService.signAsync(
       { ...payload },
@@ -52,9 +53,7 @@ export class SecurityService {
       });
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: refreshPayload.id },
-    });
+    const user = await this.getUserById(refreshPayload.id);
     if (!user) {
       throw new UnauthorizedException({
         statusCode: 401,
@@ -81,6 +80,13 @@ export class SecurityService {
     );
   }
   public async getUserById(id: string) {
-    return this.prisma.user.findUnique({ where: { id: id } });
+    return (await this.prisma.user.findUnique({
+      where: { id: id },
+      include: { UserRole: { select: { title: true, type: true } } },
+    })) as IUserWithRole;
+  }
+
+  public async getRoleById(id: string) {
+    return this.prisma.userRole.findUnique({ where: { id: id } });
   }
 }

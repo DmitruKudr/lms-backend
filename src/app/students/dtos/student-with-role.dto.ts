@@ -17,7 +17,6 @@ export class StudentWithRoleDto extends UserWithRoleDto {
 
   public static fromModel(model: IStudentWithRole, password?: string) {
     const it = super.fromModel(model, password) as StudentWithRoleDto;
-
     it.birthDate = model.Student.birthDate;
     it.institution = model.Student.institution;
 

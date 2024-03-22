@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsDate,
+  IsDateString,
   IsEmail,
   IsLowercase,
   IsOptional,
@@ -8,8 +10,9 @@ import {
   Matches,
   validate,
 } from 'class-validator';
+import { DefaultRoleTitlesEnum } from '../../../shared/enums/default-role-titles.enum';
 
-export class CreateStudentForm {
+export class CreateSpecialStudentForm {
   @ApiProperty({
     description: 'User name',
     minLength: 6,
@@ -60,17 +63,36 @@ export class CreateStudentForm {
   @IsLowercase()
   roleTitle!: string;
 
-  public static from(form: CreateStudentForm) {
-    const it = new CreateStudentForm();
+  @ApiProperty({
+    description: 'Student institution title',
+    example: 'Stanford University',
+  })
+  @Length(8, 40, { message: 'institution title must be 8-40 characters long' })
+  @IsString()
+  @IsOptional()
+  institution?: string;
+
+  @ApiProperty({
+    description: 'Student birth date',
+    example: '2024-03-21T16:21:32.206Z',
+  })
+  @IsDateString()
+  @IsOptional()
+  birthDate?: Date;
+
+  public static from(form: CreateSpecialStudentForm) {
+    const it = new CreateSpecialStudentForm();
     it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);
     it.email = form.email;
     it.password = form.password;
     it.roleTitle = form.roleTitle;
+    it.institution = form.institution;
+    it.birthDate = form.birthDate;
 
     return it;
   }
 
-  public static async validate(form: CreateStudentForm) {
+  public static async validate(form: CreateSpecialStudentForm) {
     const errors = await validate(form);
 
     return errors?.length ? errors : null;

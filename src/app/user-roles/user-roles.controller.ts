@@ -78,7 +78,9 @@ export class UserRolesController {
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ManageUserRoles)
   public async findById(@Param('id') id: string) {
-    return await this.userRolesService.findWithId(id);
+    const model = await this.userRolesService.findWithId(id);
+
+    return UserRoleDto.fromModel(model);
   }
 
   @Patch(':id')
@@ -117,8 +119,10 @@ export class UserRolesController {
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ArchiveEverything)
-  activateById(@Param('id') id: string) {
-    return this.userRolesService.activateWithId(id);
+  public async activateById(@Param('id') id: string) {
+    const model = await this.userRolesService.activateWithId(id);
+
+    return UserRoleDto.fromModel(model);
   }
 
   @Delete(':id')
@@ -130,7 +134,9 @@ export class UserRolesController {
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ArchiveEverything)
-  archiveById(@Param('id') id: string) {
-    return this.userRolesService.archiveWithId(id);
+  public async archiveById(@Param('id') id: string) {
+    const model = await this.userRolesService.archiveWithId(id);
+
+    return UserRoleDto.fromModel(model);
   }
 }

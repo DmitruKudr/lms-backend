@@ -1,6 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { CreateStudentForm } from './dtos/create-student.form';
+import { CreateSpecialStudentForm } from './dtos/create-special-student.form';
 import { UsersService } from '../users/users.service';
 import { BaseStatusesEnum, UserRoleTypesEnum } from '@prisma/client';
 import { IStudentWithRole } from './types/student-with-role.interface';
@@ -17,7 +21,7 @@ export class StudentsService {
     private userRolesService: UserRolesService,
   ) {}
 
-  public async create(form: CreateStudentForm) {
+  public async create(form: CreateSpecialStudentForm) {
     await this.usersService.doesUserExist(form.email);
 
     const role = await this.userRolesService.findRoleWithTitle(form.roleTitle);
@@ -38,7 +42,8 @@ export class StudentsService {
 
         Student: {
           create: {
-            institution: 'Stanford University',
+            birthDate: form.birthDate,
+            institution: form.institution,
           },
         },
       },
@@ -93,5 +98,27 @@ export class StudentsService {
     remaining -= take + skip;
 
     return remaining > 0 ? { models, remaining } : { models, remaining: 0 };
+  }
+
+  public async findActiveWithId(id: string) {
+    const model = (await this.prisma.user.findUnique({
+      where: {
+        id: id,
+        status: BaseStatusesEnum.Active,
+      },
+      include: {
+        Student: { select: { birthDate: true, institution: true } },
+        UserRole: { select: { title: true, type: true } },
+      },
+    })) as IStudentWithRole;
+
+    if (!model) {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: ErrorCodesEnum.NotFound + 'student',
+      });
+    }
+
+    return model;
   }
 }

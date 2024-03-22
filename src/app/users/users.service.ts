@@ -38,9 +38,9 @@ export class UsersService {
         email: form.email,
         password: await hash(form.password),
         roleId: role.id,
+        [role.type]: { create: {} },
       },
     });
-    await this.prisma[role.type].create({ data: { id: newModel.id } });
 
     return {
       ...newModel,
@@ -167,9 +167,10 @@ export class UsersService {
 
   // ===== shared methods =====
   public async doesUserExist(email: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = (await this.prisma.user.findUnique({
       where: { email: email },
-    });
+      include: { UserRole: { select: { title: true, type: true } } },
+    })) as IUserWithRole;
     if (user) {
       throw new BadRequestException({
         statusCode: 400,

@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
   Query,
   UseGuards,
@@ -17,7 +18,7 @@ import { UserRolePermissionsEnum, UserRoleTypesEnum } from '@prisma/client';
 import { RequiredPermissions } from '../security/decorators/required-permissions.decorator';
 import { JwtPermissionsGuard } from '../security/guards/jwt-permissions.guard';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
-import { CreateStudentForm } from './dtos/create-student.form';
+import { CreateSpecialStudentForm } from './dtos/create-special-student.form';
 import { StudentWithRoleDto } from './dtos/student-with-role.dto';
 import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
 
@@ -25,18 +26,18 @@ import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
-  @Post()
+  @Post('special-students')
   @ApiOperation({ summary: 'Create new student' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
-    type: UserWithRoleDto,
+    type: StudentWithRoleDto,
   })
   @UseGuards(JwtPermissionsGuard)
-  @RequiredPermissions(UserRolePermissionsEnum.CreateDefaultUsers)
-  public async createDefaultUser(@Body() body: CreateStudentForm) {
-    const form = CreateStudentForm.from(body);
-    const errors = await CreateStudentForm.validate(form);
+  @RequiredPermissions(UserRolePermissionsEnum.CreateSpecialUsers)
+  public async createSpecialStudent(@Body() body: CreateSpecialStudentForm) {
+    const form = CreateSpecialStudentForm.from(body);
+    const errors = await CreateSpecialStudentForm.validate(form);
     if (errors) {
       throw new BadRequestException({
         statusCode: 400,
@@ -53,15 +54,29 @@ export class StudentsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
-    type: UserWithRoleDto,
+    type: StudentWithRoleDto,
     isArray: true,
   })
-  @UseGuards(JwtRolesGuard)
-  @RequiredRoles(UserRoleTypesEnum.Student)
-  @RequiredPermissions(UserRolePermissionsEnum.FindAllUsers)
+  // @UseGuards(JwtRolesGuard)
+  // @RequiredRoles(UserRoleTypesEnum.Student)
+  // @RequiredPermissions(UserRolePermissionsEnum.FindAllUsers)
   public async findActive(@Query() query: BaseQueryDto) {
     const { models, remaining } = await this.studentsService.findActive(query);
 
     return { students: StudentWithRoleDto.fromModels(models), remaining };
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Find active student with id' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: StudentWithRoleDto,
+    isArray: true,
+  })
+  public async findActiveWithId(@Param('id') id: string) {
+    const model = await this.studentsService.findActiveWithId(id);
+
+    return StudentWithRoleDto.fromModel(model);
   }
 }

@@ -8,7 +8,6 @@ import {
   validate,
 } from 'class-validator';
 import { DefaultRoleTitlesEnum } from '../../../shared/enums/default-role-titles.enum';
-import { hash } from 'argon2';
 
 export class SignUpForm {
   @ApiProperty({
@@ -56,23 +55,14 @@ export class SignUpForm {
     enum: DefaultRoleTitlesEnum,
   })
   @IsEnum(DefaultRoleTitlesEnum)
-  role!: DefaultRoleTitlesEnum;
+  roleTitle!: DefaultRoleTitlesEnum;
 
   public static from(form: SignUpForm) {
     const it = new SignUpForm();
-    it.name = form.name;
+    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);
     it.email = form.email;
     it.password = form.password;
-    it.role = form.role;
-
-    return it;
-  }
-
-  public static async beforeCreation(form: SignUpForm) {
-    const it = new SignUpForm();
-    it.name = form.name;
-    it.email = form.email;
-    it.password = await hash(form.password);
+    it.roleTitle = form.roleTitle;
 
     return it;
   }
@@ -81,5 +71,12 @@ export class SignUpForm {
     const errors = await validate(form);
 
     return errors?.length ? errors : null;
+  }
+
+  private static capitalizeFirstLetters(str: string) {
+    return str
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 }
