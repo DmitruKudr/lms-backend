@@ -4,16 +4,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { CreateDefaultUserForm } from './dtos/create-default-user.form';
-import { CreateSpecialUserForm } from './dtos/create-special-user.form';
 import { BaseStatusesEnum, UserRoleTypesEnum } from '@prisma/client';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
-import { UserWithRole } from './types/user-with-role.interface';
+import { IUserWithRole } from './types/user-with-role.interface';
 import { UserRolesService } from '../user-roles/user-roles.service';
 import { UserQueryDto } from './dtos/user-query.dto';
 import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
+import { hash } from 'argon2';
+import { TCreateUserForms } from './types/create-user-forms.type';
 
-type CreateUserForms = CreateDefaultUserForm | CreateSpecialUserForm;
 @Injectable()
 export class UsersService {
   constructor(
@@ -21,22 +20,23 @@ export class UsersService {
     private userRolesService: UserRolesService,
   ) {}
 
-  public async createUser(form: CreateUserForms) {
+  public async create(form: TCreateUserForms) {
     await this.doesUserExist(form.email);
 
     const role = await this.userRolesService.findRoleWithTitle(form.roleTitle);
     if (role.type === UserRoleTypesEnum.Admin) {
       throw new BadRequestException({
         statusCode: 400,
-        message: ErrorCodesEnum.InvalidRole + role.title,
+        message: ErrorCodesEnum.NotAdminRole + role.title,
       });
     }
 
-    const preparedForm = await CreateDefaultUserForm.beforeCreation(form);
     const newModel = await this.prisma.user.create({
       data: {
-        ...preparedForm,
-        username: await this.generateUsername(preparedForm.name),
+        name: form.name,
+        username: await this.generateUsername(form.name),
+        email: form.email,
+        password: await hash(form.password),
         roleId: role.id,
       },
     });
@@ -48,7 +48,7 @@ export class UsersService {
         title: role.title,
         type: role.type,
       },
-    } as UserWithRole;
+    } as IUserWithRole;
   }
 
   public async findActiveUsers(query: UserQueryDto) {
@@ -72,7 +72,7 @@ export class UsersService {
       include: { UserRole: { select: { title: true, type: true } } },
       take: take,
       skip: skip,
-    })) as UserWithRole[];
+    })) as IUserWithRole[];
 
     let remaining = await this.prisma.user.count({
       where: {
@@ -114,7 +114,7 @@ export class UsersService {
       include: { UserRole: { select: { title: true, type: true } } },
       take: take,
       skip: skip,
-    })) as UserWithRole[];
+    })) as IUserWithRole[];
 
     let remaining = await this.prisma.user.count({
       where: {
@@ -141,7 +141,7 @@ export class UsersService {
         where: { id: id },
         data: { status: BaseStatusesEnum.Active },
         include: { UserRole: { select: { title: true, type: true } } },
-      })) as UserWithRole;
+      })) as IUserWithRole;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
@@ -156,7 +156,7 @@ export class UsersService {
         where: { id: id },
         data: { status: BaseStatusesEnum.Archived },
         include: { UserRole: { select: { title: true, type: true } } },
-      })) as UserWithRole;
+      })) as IUserWithRole;
     } catch {
       throw new NotFoundException({
         statusCode: 404,

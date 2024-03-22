@@ -47,7 +47,7 @@ export class UsersController {
         errors,
       });
     }
-    const model = await this.usersService.createUser(form);
+    const model = await this.usersService.create(form);
 
     return UserWithRoleDto.fromModel(model, form.password);
   }
@@ -71,7 +71,7 @@ export class UsersController {
         errors,
       });
     }
-    const model = await this.usersService.createUser(form);
+    const model = await this.usersService.create(form);
 
     return UserWithRoleDto.fromModel(model, form.password);
   }

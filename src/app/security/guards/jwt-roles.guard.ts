@@ -47,7 +47,7 @@ export class JwtRolesGuard extends JwtPermissionsGuard implements CanActivate {
     if (!includes(this.roles, payload.roleType)) {
       throw new ForbiddenException({
         statusCode: 403,
-        message: ErrorCodesEnum.WrongRole + this.roles.join(', '),
+        message: ErrorCodesEnum.NotRequiredRole + this.roles.join(', '),
       });
     }
 

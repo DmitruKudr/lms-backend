@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsEnum,
   IsLowercase,
   IsOptional,
   IsString,
@@ -9,9 +8,6 @@ import {
   Matches,
   validate,
 } from 'class-validator';
-import { DefaultRoleTitlesEnum } from '../../../shared/enums/default-role-titles.enum';
-import { hash } from 'argon2';
-import { CreateUserFormTypes } from '../types/create-user-forms.type';
 
 export class CreateSpecialUserForm {
   @ApiProperty({
@@ -70,15 +66,6 @@ export class CreateSpecialUserForm {
     it.email = form.email;
     it.password = form.password;
     it.roleTitle = form.roleTitle;
-
-    return it;
-  }
-
-  public static async beforeCreation(form: CreateUserFormTypes) {
-    const it = new CreateSpecialUserForm();
-    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);
-    it.email = form.email;
-    it.password = await hash(form.password);
 
     return it;
   }

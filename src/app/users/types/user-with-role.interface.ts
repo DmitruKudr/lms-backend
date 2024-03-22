@@ -1,19 +1,11 @@
-import {
-  BaseStatusesEnum,
-  User,
-  UserRole,
-  UserRoleTypesEnum,
-} from '@prisma/client';
+import { BaseStatusesEnum, UserRoleTypesEnum } from '@prisma/client';
+import { IStatusModel } from '../../../shared/types/status-model.interface';
 
-export interface UserWithRole {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  status: BaseStatusesEnum;
-
+export interface IUserWithRole extends IStatusModel {
   name: string;
   username: string;
   email: string;
+  avatar: string;
   roleId: string;
 
   UserRole: {

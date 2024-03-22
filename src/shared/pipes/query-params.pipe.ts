@@ -15,5 +15,7 @@ export class QueryParamsPipe extends ValidationPipe implements PipeTransform {
         return undefined;
       }
     }
+
+    return value;
   }
 }

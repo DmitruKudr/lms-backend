@@ -1,16 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsEnum,
+  IsLowercase,
   IsOptional,
   IsString,
   Length,
   Matches,
   validate,
 } from 'class-validator';
-import { DefaultRoleTitlesEnum } from '../../../shared/enums/default-role-titles.enum';
 
-export class CreateDefaultUserForm {
+export class CreateStudentForm {
   @ApiProperty({
     description: 'User name',
     minLength: 6,
@@ -54,14 +53,15 @@ export class CreateDefaultUserForm {
   password!: string;
 
   @ApiProperty({
-    description: 'User default role title',
-    enum: DefaultRoleTitlesEnum,
+    description: 'Student role title (role type must be Student!)',
+    example: 'self student',
   })
-  @IsEnum(DefaultRoleTitlesEnum)
-  roleTitle!: DefaultRoleTitlesEnum;
+  @IsString()
+  @IsLowercase()
+  roleTitle!: string;
 
-  public static from(form: CreateDefaultUserForm) {
-    const it = new CreateDefaultUserForm();
+  public static from(form: CreateStudentForm) {
+    const it = new CreateStudentForm();
     it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);
     it.email = form.email;
     it.password = form.password;
@@ -70,7 +70,7 @@ export class CreateDefaultUserForm {
     return it;
   }
 
-  public static async validate(form: CreateDefaultUserForm) {
+  public static async validate(form: CreateStudentForm) {
     const errors = await validate(form);
 
     return errors?.length ? errors : null;

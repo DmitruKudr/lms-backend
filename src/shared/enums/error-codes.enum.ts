@@ -16,9 +16,10 @@ export enum ErrorCodesEnum {
   // ===== forbidden =====
   NotEnoughPermissions = 'errors.forbidden.user-does-not-have-necessary-permissions: ',
   NotEnoughAdminPermissions = 'errors.forbidden.admin-does-not-have-necessary-permissions: ',
-  WrongRole = 'errors.forbidden.user-must-be-one-of-the-following-roles: ',
+  NotRequiredRole = 'errors.forbidden.user-role-must-be-one-of-the-following-roles: ',
   NotCurrentUser = 'errors.forbidden.not-current-user',
 
   // ===== special =====
-  InvalidRole = 'errors.invalid-form.role-must-be-not-admin: ',
+  NotAdminRole = 'errors.invalid-form.user-role-must-be-not-admin: ',
+  InvalidRole = 'errors.invalid-form.user-role-must-be: ',
 }
