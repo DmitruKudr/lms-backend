@@ -7,10 +7,11 @@ import {
   IsString,
   Length,
   Matches,
+  NotContains,
   validate,
 } from 'class-validator';
 
-export class CreateSpecialStudentForm {
+export class UpdateStudentForm {
   @ApiProperty({
     description: 'Student name',
     minLength: 6,
@@ -31,11 +32,27 @@ export class CreateSpecialStudentForm {
   name?: string;
 
   @ApiProperty({
+    description: 'Student username',
+    minLength: 6,
+    maxLength: 40,
+    example: 'johndoejunior',
+    required: false,
+  })
+  @IsString()
+  @IsLowercase()
+  @NotContains(' ', { message: 'username must not contain spaces' })
+  @Length(6, 40, { message: 'name must be 6-40 characters long' })
+  @IsOptional()
+  username?: string;
+
+  @ApiProperty({
     description: 'Student email',
     format: 'email',
+    required: false,
   })
   @IsEmail()
-  email!: string;
+  @IsOptional()
+  email?: string;
 
   @ApiProperty({
     description: 'Student password',
@@ -43,6 +60,7 @@ export class CreateSpecialStudentForm {
     maxLength: 20,
     pattern: '^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$',
     example: 'qwerty12',
+    required: false,
   })
   @IsString()
   @Length(8, 20, { message: 'password must be 8-20 characters long' })
@@ -51,15 +69,16 @@ export class CreateSpecialStudentForm {
       'password must consist only of letters and digits' +
       'password must contain at least one digit and letter',
   })
-  password!: string;
+  @IsOptional()
+  password?: string;
 
   @ApiProperty({
-    description: 'Student role title (role type must be Student!)',
-    example: 'self student',
+    description: 'Student birth date',
+    example: '2024-03-21T16:21:32.206Z',
   })
-  @IsString()
-  @IsLowercase()
-  roleTitle!: string;
+  @IsDateString()
+  @IsOptional()
+  birthDate?: Date;
 
   @ApiProperty({
     description: 'Student institution title',
@@ -72,37 +91,22 @@ export class CreateSpecialStudentForm {
   @IsOptional()
   institution?: string;
 
-  @ApiProperty({
-    description: 'Student birth date',
-    example: '2024-03-21T16:21:32.206Z',
-  })
-  @IsDateString()
-  @IsOptional()
-  birthDate?: Date;
+  public static from(form: UpdateStudentForm) {
+    const it = new UpdateStudentForm();
+    it.name = form?.name;
+    it.username = form?.username;
+    it.email = form?.email;
+    it.password = form?.password;
 
-  public static from(form: CreateSpecialStudentForm) {
-    const it = new CreateSpecialStudentForm();
-    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);
-    it.email = form.email;
-    it.password = form.password;
-    it.roleTitle = form.roleTitle;
-
-    it.institution = form.institution;
-    it.birthDate = form.birthDate;
+    it.institution = form?.institution;
+    it.birthDate = form?.birthDate;
 
     return it;
   }
 
-  public static async validate(form: CreateSpecialStudentForm) {
+  public static async validate(form: UpdateStudentForm) {
     const errors = await validate(form);
 
     return errors?.length ? errors : null;
-  }
-
-  private static capitalizeFirstLetters(str: string) {
-    return str
-      .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
   }
 }

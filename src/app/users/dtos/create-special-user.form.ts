@@ -27,7 +27,7 @@ export class CreateSpecialUserForm {
       'name must not contain digits',
   })
   @IsOptional()
-  name: string;
+  name?: string;
 
   @ApiProperty({
     description: 'User email',

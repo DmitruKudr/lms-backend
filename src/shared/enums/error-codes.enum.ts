@@ -6,9 +6,9 @@ export enum ErrorCodesEnum {
   InvalidQueryValue = 'errors.query-parameter.invalid-value-of-parameter: ',
 
   // ===== auth =====
-  UserAlreadyExists = 'errors.invalid-form.user-already-exists',
-  UserNotExists = 'errors.authorization.user-does-not-exist',
-  UserNotActive = 'errors.authorization.user-is-not-active',
+  UserAlreadyExists = 'errors.invalid-form.user-already-exists-with-this-field: ',
+  UserDoesNotExist = 'errors.authorization.user-does-not-exist',
+  UserIsNotActive = 'errors.authorization.user-is-not-active',
   NotAuthorized = 'errors.authorization.not-authorized-request',
   InvalidPassword = 'errors.authorization.invalid-password',
   InvalidRefresh = 'errors.authorization.invalid-refresh-token',
@@ -22,4 +22,9 @@ export enum ErrorCodesEnum {
   // ===== special =====
   NotAdminRole = 'errors.invalid-form.user-role-must-be-not-admin: ',
   InvalidRole = 'errors.invalid-form.user-role-must-be: ',
+
+  // ===== file validation =====
+  InvalidFileSize = 'errors.invalid-form.file-size-must-be-less-than: ',
+  InvalidFileType = 'errors.invalid-form.file-type-must-be: ',
+  UnknownFileType = 'errors.invalid-form.unknown-file-type',
 }

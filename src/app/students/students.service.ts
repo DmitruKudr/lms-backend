@@ -12,6 +12,11 @@ import { hash } from 'argon2';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { UserRolesService } from '../user-roles/user-roles.service';
 import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
+import { FilesService } from '../files/files.service';
+import { IFileValue } from '../../shared/types/file-value.interface';
+import { UpdateStudentForm } from './dtos/update-student.form';
+import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
+import { ConnectStudentForm } from './dtos/connect-student.form';
 
 @Injectable()
 export class StudentsService {
@@ -19,10 +24,11 @@ export class StudentsService {
     private prisma: PrismaService,
     private usersService: UsersService,
     private userRolesService: UserRolesService,
+    private filesService: FilesService,
   ) {}
 
   public async create(form: CreateSpecialStudentForm) {
-    await this.usersService.doesUserExist(form.email);
+    await this.usersService.doesUserAlreadyExist(form.email);
 
     const role = await this.userRolesService.findRoleWithTitle(form.roleTitle);
     if (role.type !== UserRoleTypesEnum.Student) {
@@ -42,13 +48,13 @@ export class StudentsService {
 
         Student: {
           create: {
-            birthDate: form.birthDate,
             institution: form.institution,
+            birthDate: form.birthDate,
           },
         },
       },
       include: {
-        Student: { select: { birthDate: true, institution: true } },
+        Student: { select: { institution: true, birthDate: true } },
         UserRole: { select: { title: true, type: true } },
       },
     })) as IStudentWithRole;
@@ -73,7 +79,7 @@ export class StudentsService {
         ],
       },
       include: {
-        Student: { select: { birthDate: true, institution: true } },
+        Student: { select: { institution: true, birthDate: true } },
         UserRole: { select: { title: true, type: true } },
       },
       take: take,
@@ -107,7 +113,7 @@ export class StudentsService {
         status: BaseStatusesEnum.Active,
       },
       include: {
-        Student: { select: { birthDate: true, institution: true } },
+        Student: { select: { institution: true, birthDate: true } },
         UserRole: { select: { title: true, type: true } },
       },
     })) as IStudentWithRole;
@@ -120,5 +126,47 @@ export class StudentsService {
     }
 
     return model;
+  }
+
+  public async updateWithId(
+    id: string,
+    form: UpdateStudentForm,
+    avatar: IFileValue,
+    currentUser: PayloadAccessDto,
+  ) {
+    this.usersService.isCurrentUser(currentUser, id);
+    await this.usersService.doesUserAlreadyExist(form.email, form.username);
+
+    const fileName = await this.filesService.tempSaveFile(avatar);
+
+    try {
+      return (await this.prisma.user.update({
+        where: { id: id, status: BaseStatusesEnum.Active },
+        data: {
+          name: form.name,
+          username: form.username,
+          email: form.email,
+          password: form.password ? await hash(form.password) : undefined,
+          avatar: fileName,
+          Student: {
+            update: {
+              data: {
+                institution: form.institution,
+                birthDate: form.birthDate,
+              },
+            },
+          },
+        },
+        include: {
+          Student: { select: { birthDate: true, institution: true } },
+          UserRole: { select: { title: true, type: true } },
+        },
+      })) as IStudentWithRole;
+    } catch {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: ErrorCodesEnum.NotFound + 'student',
+      });
+    }
   }
 }

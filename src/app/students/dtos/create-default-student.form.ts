@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsDateString,
   IsEmail,
-  IsEnum,
   IsOptional,
   IsString,
   Length,
@@ -10,9 +10,9 @@ import {
 } from 'class-validator';
 import { DefaultRoleTitlesEnum } from '../../../shared/enums/default-role-titles.enum';
 
-export class CreateDefaultUserForm {
+export class CreateDefaultStudentForm {
   @ApiProperty({
-    description: 'User name',
+    description: 'Student name',
     minLength: 6,
     maxLength: 40,
     pattern: '^((?:[А-ЯЁ][а-яё]+|[A-Z][a-z]+)(?:\\s|$)){2,3}$',
@@ -31,14 +31,14 @@ export class CreateDefaultUserForm {
   name?: string;
 
   @ApiProperty({
-    description: 'User email',
+    description: 'Student email',
     format: 'email',
   })
   @IsEmail()
   email!: string;
 
   @ApiProperty({
-    description: 'User password',
+    description: 'Student password',
     minLength: 8,
     maxLength: 20,
     pattern: '^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$',
@@ -53,24 +53,41 @@ export class CreateDefaultUserForm {
   })
   password!: string;
 
-  @ApiProperty({
-    description: 'User default role title',
-    enum: DefaultRoleTitlesEnum,
-  })
-  @IsEnum(DefaultRoleTitlesEnum)
-  roleTitle!: DefaultRoleTitlesEnum;
+  roleTitle: string;
 
-  public static from(form: CreateDefaultUserForm) {
-    const it = new CreateDefaultUserForm();
+  @ApiProperty({
+    description: 'Student institution title',
+    minLength: 8,
+    maxLength: 40,
+    example: 'Stanford University',
+  })
+  @Length(8, 40, { message: 'institution title must be 8-40 characters long' })
+  @IsString()
+  @IsOptional()
+  institution?: string;
+
+  @ApiProperty({
+    description: 'Student birth date',
+    example: '2024-03-21T16:21:32.206Z',
+  })
+  @IsDateString()
+  @IsOptional()
+  birthDate?: Date;
+
+  public static from(form: CreateDefaultStudentForm) {
+    const it = new CreateDefaultStudentForm();
     it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);
     it.email = form.email;
     it.password = form.password;
-    it.roleTitle = form.roleTitle;
+    it.roleTitle = DefaultRoleTitlesEnum.DefaultStudent;
+
+    it.institution = form.institution;
+    it.birthDate = form.birthDate;
 
     return it;
   }
 
-  public static async validate(form: CreateDefaultUserForm) {
+  public static async validate(form: CreateDefaultStudentForm) {
     const errors = await validate(form);
 
     return errors?.length ? errors : null;

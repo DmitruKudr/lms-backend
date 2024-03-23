@@ -26,7 +26,7 @@ export class AuthService {
   }
 
   public async signIn(form: SignInForm) {
-    const user = await this.usersService.doesUserExist(form.email);
+    const user = await this.usersService.findUserWithEmail(form.email);
 
     if (!(await verify(user.password, form.password))) {
       throw new UnauthorizedException({

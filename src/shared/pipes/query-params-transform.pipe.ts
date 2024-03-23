@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 
 @Injectable()
-export class QueryParamsPipe extends ValidationPipe implements PipeTransform {
+export class QueryParamsTransformPipe
+  extends ValidationPipe
+  implements PipeTransform
+{
   transform(value: any, metadata: ArgumentMetadata): any {
     if (metadata.type === 'query') {
       try {

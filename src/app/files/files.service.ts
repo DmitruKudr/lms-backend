@@ -1,0 +1,30 @@
+import { Injectable } from '@nestjs/common';
+import { IFileValue } from '../../shared/types/file-value.interface';
+import { v4 as uuidv4 } from 'uuid';
+import * as fs from 'fs';
+import * as path from 'path';
+
+@Injectable()
+export class FilesService {
+  constructor() {}
+
+  public async tempSaveFile(file: IFileValue) {
+    if (!file) {
+      return undefined;
+    }
+
+    const fileName = `${uuidv4()}.${file.originalname}`;
+    // await fs.promises.writeFile(
+    //   path.resolve(
+    //     __dirname,
+    //     '../../..',
+    //     'src/temp-files',
+    //     file.fieldname,
+    //     fileName,
+    //   ),
+    //   file.buffer,
+    // );
+
+    return fileName;
+  }
+}

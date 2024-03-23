@@ -13,7 +13,7 @@ import { ErrorCodesEnum } from '../../../shared/enums/error-codes.enum';
 import { JwtPermissionsGuard } from './jwt-permissions.guard';
 
 @Injectable()
-export class JwtAdminPermissionsGuardGuard
+export class JwtAdminPermissionsGuard
   extends JwtPermissionsGuard
   implements CanActivate
 {

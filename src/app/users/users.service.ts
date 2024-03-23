@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { UserQueryDto } from './dtos/user-query.dto';
 import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
 import { hash } from 'argon2';
 import { TCreateUserForms } from './types/create-user-forms.type';
+import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +23,7 @@ export class UsersService {
   ) {}
 
   public async create(form: TCreateUserForms) {
-    await this.doesUserExist(form.email);
+    await this.doesUserAlreadyExist(form.email);
 
     const role = await this.userRolesService.findRoleWithTitle(form.roleTitle);
     if (role.type === UserRoleTypesEnum.Admin) {
@@ -166,15 +168,34 @@ export class UsersService {
   }
 
   // ===== shared methods =====
-  public async doesUserExist(email: string) {
+
+  public async findUserWithEmail(email: string) {
     const user = (await this.prisma.user.findUnique({
       where: { email: email },
+      include: { UserRole: { select: { title: true, type: true } } },
+    })) as IUserWithRole;
+    if (!user) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.NotFound + 'user',
+      });
+    }
+
+    return user;
+  }
+  public async doesUserAlreadyExist(email?: string, username?: string) {
+    if (!email && !username) {
+      return true;
+    }
+
+    const user = (await this.prisma.user.findUnique({
+      where: { email: email, username: username },
       include: { UserRole: { select: { title: true, type: true } } },
     })) as IUserWithRole;
     if (user) {
       throw new BadRequestException({
         statusCode: 400,
-        message: ErrorCodesEnum.UserAlreadyExists,
+        message: `${ErrorCodesEnum.UserAlreadyExists}${email || username}`,
       });
     }
 
@@ -200,5 +221,19 @@ export class UsersService {
     }
 
     return username;
+  }
+
+  public isCurrentUser(currentUser: PayloadAccessDto, id: string) {
+    if (
+      currentUser.id !== id &&
+      currentUser.roleType !== UserRoleTypesEnum.Admin
+    ) {
+      throw new ForbiddenException({
+        statusCode: 403,
+        message: ErrorCodesEnum.NotCurrentUser,
+      });
+    }
+
+    return currentUser;
   }
 }

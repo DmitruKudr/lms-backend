@@ -1,4 +1,4 @@
-export class Parser {
+export class TypeParser {
   public static toNumber(value: string): number {
     const parsedValue = Number.parseInt(value);
     return isNaN(parsedValue) ? undefined : parsedValue;

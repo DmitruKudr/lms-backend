@@ -80,9 +80,9 @@ enum UserRolePermissionsEnum {
   ManageMyTests
   ManageMyTodos
   ManageMyStudentsTodos
-  AddStudents
-  AddTeachers
-  AddParents
+  ConnectWithStudents
+  ConnectWithTeachers
+  ConnectWithParents
 
   @@map("user_role_permissions_enum")
 }

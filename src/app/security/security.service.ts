@@ -21,7 +21,7 @@ export class SecurityService {
   ) {}
 
   public async generateTokens(userModel: IUserWithRole) {
-    const roleModel = await this.getRoleById(userModel.id);
+    const roleModel = await this.getRoleWithId(userModel.id);
     const payload = PayloadAccessDto.fromModel(userModel, roleModel);
     const accessToken = await this.jwtService.signAsync(
       { ...payload },
@@ -53,11 +53,11 @@ export class SecurityService {
       });
     }
 
-    const user = await this.getUserById(refreshPayload.id);
+    const user = await this.getUserWithId(refreshPayload.id);
     if (!user) {
       throw new UnauthorizedException({
         statusCode: 401,
-        message: ErrorCodesEnum.UserNotExists,
+        message: ErrorCodesEnum.UserDoesNotExist,
       });
     }
     const role = await this.prisma.userRole.findUnique({
@@ -79,14 +79,14 @@ export class SecurityService {
       },
     );
   }
-  public async getUserById(id: string) {
+  public async getUserWithId(id: string) {
     return (await this.prisma.user.findUnique({
       where: { id: id },
       include: { UserRole: { select: { title: true, type: true } } },
     })) as IUserWithRole;
   }
 
-  public async getRoleById(id: string) {
+  public async getRoleWithId(id: string) {
     return this.prisma.userRole.findUnique({ where: { id: id } });
   }
 }

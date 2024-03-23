@@ -28,19 +28,19 @@ export class JwtStrategyService extends PassportStrategy(
   }
 
   async validate(payload: PayloadType) {
-    const user = await this.securityService.getUserById(payload.id);
+    const user = await this.securityService.getUserWithId(payload.id);
 
     if (!user) {
       throw new UnauthorizedException({
         statusCode: 401,
-        message: ErrorCodesEnum.UserNotExists,
+        message: ErrorCodesEnum.UserDoesNotExist,
       });
     }
 
     if (user.status !== BaseStatusesEnum.Active) {
       throw new UnauthorizedException({
         statusCode: 401,
-        message: ErrorCodesEnum.UserNotActive,
+        message: ErrorCodesEnum.UserIsNotActive,
       });
     }
 
