@@ -18,10 +18,12 @@ export enum ErrorCodesEnum {
   NotEnoughAdminPermissions = 'errors.forbidden.admin-does-not-have-necessary-permissions: ',
   NotRequiredRole = 'errors.forbidden.user-role-must-be-one-of-the-following-roles: ',
   NotCurrentUser = 'errors.forbidden.not-current-user',
+  CanNotConnect = 'errors.forbidden.user-can-not-make-connections: ',
 
   // ===== special =====
   NotAdminRole = 'errors.invalid-form.user-role-must-be-not-admin: ',
   InvalidRole = 'errors.invalid-form.user-role-must-be: ',
+  NotIdParameter = 'errors.parameter.parameter-must-be-in-id-format: ',
 
   // ===== file validation =====
   InvalidFileSize = 'errors.invalid-form.file-size-must-be-less-than: ',

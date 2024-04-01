@@ -21,7 +21,7 @@ export class SecurityService {
   ) {}
 
   public async generateTokens(userModel: IUserWithRole) {
-    const roleModel = await this.getRoleWithId(userModel.id);
+    const roleModel = await this.getRoleWithId(userModel.roleId);
     const payload = PayloadAccessDto.fromModel(userModel, roleModel);
     const accessToken = await this.jwtService.signAsync(
       { ...payload },

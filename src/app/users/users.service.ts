@@ -5,7 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { BaseStatusesEnum, UserRoleTypesEnum } from '@prisma/client';
+import {
+  BaseStatusesEnum,
+  UserRolePermissionsEnum,
+  UserRoleTypesEnum,
+} from '@prisma/client';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { IUserWithRole } from './types/user-with-role.interface';
 import { UserRolesService } from '../user-roles/user-roles.service';
@@ -14,6 +18,7 @@ import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
 import { hash } from 'argon2';
 import { TCreateUserForms } from './types/create-user-forms.type';
 import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
+import { difference } from 'lodash';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +28,7 @@ export class UsersService {
   ) {}
 
   public async create(form: TCreateUserForms) {
-    await this.doesUserAlreadyExist(form.email);
+    await this.doesActiveUserAlreadyExist({ email: form.email });
 
     const role = await this.userRolesService.findRoleWithTitle(form.roleTitle);
     if (role.type === UserRoleTypesEnum.Admin) {
@@ -141,7 +146,11 @@ export class UsersService {
     try {
       return (await this.prisma.user.update({
         where: { id: id },
-        data: { status: BaseStatusesEnum.Active },
+        data: {
+          status: BaseStatusesEnum.Active,
+          name: 'Activated User',
+          username: await this.generateUsername('Activated User'),
+        },
         include: { UserRole: { select: { title: true, type: true } } },
       })) as IUserWithRole;
     } catch {
@@ -169,33 +178,75 @@ export class UsersService {
 
   // ===== shared methods =====
 
-  public async findUserWithEmail(email: string) {
-    const user = (await this.prisma.user.findUnique({
-      where: { email: email },
-      include: { UserRole: { select: { title: true, type: true } } },
-    })) as IUserWithRole;
+  public async findActiveUser(
+    options: Partial<{
+      id: string;
+      email: string;
+      roleType: UserRoleTypesEnum;
+      permissions: UserRolePermissionsEnum[];
+    }>,
+    errorMessageEnd?: string,
+  ) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        AND: [
+          { OR: [{ id: options.id }, { email: options.email }] },
+          options.roleType ? { UserRole: { type: options.roleType } } : {},
+          { status: BaseStatusesEnum.Active },
+        ],
+      },
+      include: {
+        UserRole: { select: { title: true, type: true, permissions: true } },
+      },
+    });
+
     if (!user) {
       throw new BadRequestException({
         statusCode: 400,
-        message: ErrorCodesEnum.NotFound + 'user',
+        message:
+          ErrorCodesEnum.NotFound +
+          (errorMessageEnd || options.id || options.email),
       });
     }
+    if (options?.permissions.length) {
+      const lackingPermissions = difference(
+        options.permissions,
+        user.UserRole.permissions,
+      );
+      if (lackingPermissions.length) {
+        throw new ForbiddenException({
+          statusConde: 403,
+          message:
+            `${ErrorCodesEnum.NotEnoughPermissions}${lackingPermissions.join(
+              ', ',
+            )}` + (errorMessageEnd ? ` (${errorMessageEnd})` : ''),
+        });
+      }
+    }
 
-    return user;
+    return user as IUserWithRole;
   }
-  public async doesUserAlreadyExist(email?: string, username?: string) {
-    if (!email && !username) {
+
+  public async doesActiveUserAlreadyExist(
+    options: Partial<{ email: string; username: string }>,
+  ) {
+    if (!options.email && !options.username) {
       return true;
     }
 
-    const user = (await this.prisma.user.findUnique({
-      where: { email: email, username: username },
+    const user = (await this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: options.email }, { username: options.username }],
+        status: BaseStatusesEnum.Active,
+      },
       include: { UserRole: { select: { title: true, type: true } } },
     })) as IUserWithRole;
     if (user) {
       throw new BadRequestException({
         statusCode: 400,
-        message: `${ErrorCodesEnum.UserAlreadyExists}${email || username}`,
+        message:
+          ErrorCodesEnum.UserAlreadyExists +
+          (user.email === options.email ? options.email : options.username),
       });
     }
 
@@ -205,7 +256,10 @@ export class UsersService {
   public async generateUsername(name: string) {
     const username = name.toLowerCase().split(' ').join('');
     const users = await this.prisma.user.findMany({
-      where: { username: { contains: username } },
+      where: {
+        username: { contains: username },
+        status: BaseStatusesEnum.Active,
+      },
     });
 
     if (users.length) {

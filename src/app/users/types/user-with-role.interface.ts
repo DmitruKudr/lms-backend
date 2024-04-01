@@ -7,7 +7,7 @@ export interface IUserWithRole extends IStatusModel {
   email: string;
   password: string;
   avatar: string;
-  link: string;
+  recoveryLink: string;
   roleId: string;
 
   UserRole: {

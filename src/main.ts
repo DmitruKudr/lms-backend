@@ -3,7 +3,8 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { QueryParamsTransformPipe } from './shared/pipes/query-params-transform.pipe';
-import { FileValidationPipe } from './shared/pipes/file-validation.pipe';
+import { FilesValidationPipe } from './shared/pipes/files-validation.pipe';
+import { IdParamsValidationPipe } from './shared/pipes/id-params-validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,8 +14,9 @@ async function bootstrap() {
   app.setGlobalPrefix(config.get('API_URL'));
 
   app.useGlobalPipes(
+    new IdParamsValidationPipe(),
     new QueryParamsTransformPipe({ transform: true }),
-    new FileValidationPipe(),
+    new FilesValidationPipe(),
   );
 
   const swagger = new DocumentBuilder()

@@ -10,7 +10,7 @@ import { ErrorCodesEnum } from '../enums/error-codes.enum';
 import { Multer } from 'multer';
 
 @Injectable()
-export class FileValidationPipe implements PipeTransform {
+export class FilesValidationPipe implements PipeTransform {
   transform(value: Express.Multer.File, metadata: ArgumentMetadata) {
     if (metadata.type !== 'custom' || !this.isFile(value)) {
       return value;

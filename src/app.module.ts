@@ -4,6 +4,7 @@ import { AuthModule } from './app/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './app/users/users.module';
 import { StudentsModule } from './app/students/students.module';
+import { ConnectionsModule } from './app/connections/connections.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { StudentsModule } from './app/students/students.module';
     UserRolesModule,
     AuthModule,
     UsersModule,
+    ConnectionsModule,
     StudentsModule,
   ],
   controllers: [],

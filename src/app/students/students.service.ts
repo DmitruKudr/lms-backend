@@ -16,7 +16,6 @@ import { FilesService } from '../files/files.service';
 import { IFileValue } from '../../shared/types/file-value.interface';
 import { UpdateStudentForm } from './dtos/update-student.form';
 import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
-import { ConnectStudentForm } from './dtos/connect-student.form';
 
 @Injectable()
 export class StudentsService {
@@ -28,7 +27,7 @@ export class StudentsService {
   ) {}
 
   public async create(form: CreateSpecialStudentForm) {
-    await this.usersService.doesUserAlreadyExist(form.email);
+    await this.usersService.doesActiveUserAlreadyExist({ email: form.email });
 
     const role = await this.userRolesService.findRoleWithTitle(form.roleTitle);
     if (role.type !== UserRoleTypesEnum.Student) {
@@ -135,7 +134,10 @@ export class StudentsService {
     currentUser: PayloadAccessDto,
   ) {
     this.usersService.isCurrentUser(currentUser, id);
-    await this.usersService.doesUserAlreadyExist(form.email, form.username);
+    await this.usersService.doesActiveUserAlreadyExist({
+      email: form.email,
+      username: form.username,
+    });
 
     const fileName = await this.filesService.tempSaveFile(avatar);
 

@@ -7,7 +7,6 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Query,
   UploadedFile,
   UseGuards,
@@ -16,7 +15,7 @@ import {
 import { StudentsService } from './students.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAdminPermissionsGuard } from '../security/guards/jwt-admin-permissions.guard';
-import { UserRolePermissionsEnum, UserRoleTypesEnum } from '@prisma/client';
+import { UserRolePermissionsEnum } from '@prisma/client';
 import { RequiredPermissions } from '../security/decorators/required-permissions.decorator';
 import { JwtPermissionsGuard } from '../security/guards/jwt-permissions.guard';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
@@ -29,7 +28,6 @@ import { UpdateStudentForm } from './dtos/update-student.form';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '../security/decorators/current-user.decorator';
 import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
-import { ConnectStudentForm } from './dtos/connect-student.form';
 
 @ApiTags('students')
 @Controller('students')
