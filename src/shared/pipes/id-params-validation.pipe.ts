@@ -14,11 +14,11 @@ export class IdParamsValidationPipe
 {
   transform(value: string, metadata: ArgumentMetadata): any {
     if (metadata.type === 'param') {
-      if (metadata.data.includes('id') || metadata.data.includes('Id')) {
-        const uuidv4Pattern =
+      if (metadata.data === 'id' || metadata.data.includes('Id')) {
+        const uuidV4Pattern =
           /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-        if (!uuidv4Pattern.test(value)) {
+        if (!uuidV4Pattern.test(value)) {
           throw new BadRequestException({
             statusCode: 400,
             message: ErrorCodesEnum.NotIdParameter + metadata.data,

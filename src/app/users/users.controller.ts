@@ -89,7 +89,7 @@ export class UsersController {
       query,
     );
 
-    return { users: UserWithRoleDto.fromModels(models), remaining };
+    return { data: UserWithRoleDto.fromModels(models), remaining };
   }
 
   @Get('admins')
@@ -105,7 +105,7 @@ export class UsersController {
   public async findAllAdmins(@Query() query: BaseQueryDto) {
     const { models, remaining } = await this.usersService.findAllAdmins(query);
 
-    return { admins: UserWithRoleDto.fromModels(models), remaining };
+    return { data: UserWithRoleDto.fromModels(models), remaining };
   }
 
   @Put(':id')

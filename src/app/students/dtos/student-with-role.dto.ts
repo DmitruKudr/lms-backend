@@ -24,8 +24,6 @@ export class StudentWithRoleDto extends UserWithRoleDto {
   }
 
   public static fromModels(models: IStudentWithRole[]) {
-    return !models?.map
-      ? []
-      : models.map((studentWithRole) => this.fromModel(studentWithRole));
+    return !models?.map ? [] : models.map((model) => this.fromModel(model));
   }
 }

@@ -43,7 +43,7 @@ export class JwtAdminPermissionsGuard
     }
 
     if (isEmpty(this.adminPermissions)) {
-      super.handleRequest(err, payload);
+      return super.handleRequest(err, payload);
     }
 
     if (payload.roleType === UserRoleTypesEnum.Admin) {
@@ -61,6 +61,6 @@ export class JwtAdminPermissionsGuard
       }
     }
 
-    super.handleRequest(err, payload);
+    return super.handleRequest(err, payload);
   }
 }

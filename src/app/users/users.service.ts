@@ -185,7 +185,6 @@ export class UsersService {
       roleType: UserRoleTypesEnum;
       permissions: UserRolePermissionsEnum[];
     }>,
-    errorMessageEnd?: string,
   ) {
     const user = await this.prisma.user.findFirst({
       where: {
@@ -202,13 +201,12 @@ export class UsersService {
 
     if (!user) {
       throw new BadRequestException({
-        statusCode: 400,
+        statusCode: 404,
         message:
-          ErrorCodesEnum.NotFound +
-          (errorMessageEnd || options.id || options.email),
+          ErrorCodesEnum.NotFound + `user ${Object.entries(options).join(' ')}`,
       });
     }
-    if (options?.permissions.length) {
+    if (options?.permissions?.length) {
       const lackingPermissions = difference(
         options.permissions,
         user.UserRole.permissions,
@@ -216,10 +214,11 @@ export class UsersService {
       if (lackingPermissions.length) {
         throw new ForbiddenException({
           statusConde: 403,
-          message:
-            `${ErrorCodesEnum.NotEnoughPermissions}${lackingPermissions.join(
-              ', ',
-            )}` + (errorMessageEnd ? ` (${errorMessageEnd})` : ''),
+          message: `${
+            ErrorCodesEnum.NotEnoughPermissions
+          }${lackingPermissions.join(', ')} for ${user.UserRole.type} with id ${
+            user.id
+          }`,
         });
       }
     }

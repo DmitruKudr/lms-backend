@@ -41,7 +41,7 @@ export class JwtRolesGuard extends JwtPermissionsGuard implements CanActivate {
     }
 
     if (isEmpty(this.roles)) {
-      super.handleRequest(err, payload);
+      return super.handleRequest(err, payload);
     }
 
     if (!includes(this.roles, payload.roleType)) {

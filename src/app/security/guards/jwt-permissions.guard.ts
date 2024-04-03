@@ -69,6 +69,8 @@ export class JwtPermissionsGuard
           } ${this.permissions.join(', ')} (match at least one permission)`,
         });
       }
+
+      return payload;
     }
 
     const lackingPermissions = difference(

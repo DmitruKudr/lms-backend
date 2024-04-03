@@ -65,7 +65,7 @@ export class UserRolesController {
   public async findAll(@Query() query: UserRoleQueryDto) {
     const { models, remaining } = await this.userRolesService.findAll(query);
 
-    return { roles: UserRoleDto.fromModels(models), remaining };
+    return { data: UserRoleDto.fromModels(models), remaining };
   }
 
   @Get(':id')

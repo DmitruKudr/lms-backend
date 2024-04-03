@@ -16,39 +16,32 @@ export class FilesValidationPipe implements PipeTransform {
       return value;
     }
 
-    switch (value.fieldname) {
-      case FileTypesEnum.Avatar: {
-        const MBytes = 5;
-        if (value.size > MBytes * 1024 * 1024) {
-          throw new BadRequestException({
-            statusCode: 400,
-            message: `${ErrorCodesEnum.InvalidFileSize}${MBytes} MBytes`,
-          });
-        }
-
-        if (value.mimetype.split('/')[0] !== 'image') {
-          throw new BadRequestException({
-            statusCode: 400,
-            message: ErrorCodesEnum.InvalidFileType + 'image (png, jpg)',
-          });
-        }
-
-        break;
-      }
-
-      case FileTypesEnum.TestImage: {
-        break;
-      }
-
-      default: {
+    if (value.fieldname === FileTypesEnum.Avatar) {
+      const MBytes = 5;
+      if (value.size > MBytes * 1024 * 1024) {
         throw new BadRequestException({
           statusCode: 400,
-          message: ErrorCodesEnum.UnknownFileType,
+          message: `${ErrorCodesEnum.InvalidFileSize}${MBytes} MBytes`,
         });
       }
+      if (value.mimetype.split('/')[0] !== 'image') {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: ErrorCodesEnum.InvalidFileType + 'image (png, jpg)',
+        });
+      }
+
+      return value;
     }
 
-    return value;
+    if (value.fieldname === FileTypesEnum.TestImage) {
+      return value;
+    }
+
+    throw new BadRequestException({
+      statusCode: 400,
+      message: ErrorCodesEnum.UnknownFileType,
+    });
   }
 
   private isFile(value: Express.Multer.File) {

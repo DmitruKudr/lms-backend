@@ -4,9 +4,9 @@ export enum ErrorCodesEnum {
   UniqueField = 'errors.invalid-form.field-must-be-unique: ',
   NotFound = 'errors.not-found: ',
   InvalidQueryValue = 'errors.query-parameter.invalid-value-of-parameter: ',
+  UserAlreadyExists = 'errors.invalid-form.user-already-exists-with-this-field: ',
 
   // ===== auth =====
-  UserAlreadyExists = 'errors.invalid-form.user-already-exists-with-this-field: ',
   UserDoesNotExist = 'errors.authorization.user-does-not-exist',
   UserIsNotActive = 'errors.authorization.user-is-not-active',
   NotAuthorized = 'errors.authorization.not-authorized-request',
@@ -29,4 +29,7 @@ export enum ErrorCodesEnum {
   InvalidFileSize = 'errors.invalid-form.file-size-must-be-less-than: ',
   InvalidFileType = 'errors.invalid-form.file-type-must-be: ',
   UnknownFileType = 'errors.invalid-form.unknown-file-type',
+
+  // ===== connections =====
+  ConnectionAlreadyExists = 'errors.invalid-form.connection-already-exists: ',
 }

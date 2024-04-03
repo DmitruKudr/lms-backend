@@ -92,7 +92,7 @@ export class StudentsController {
   public async findActive(@Query() query: BaseQueryDto) {
     const { models, remaining } = await this.studentsService.findActive(query);
 
-    return { students: StudentWithRoleDto.fromModels(models), remaining };
+    return { data: StudentWithRoleDto.fromModels(models), remaining };
   }
 
   @Get(':id')

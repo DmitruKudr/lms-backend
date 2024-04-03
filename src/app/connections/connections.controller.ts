@@ -2,10 +2,13 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
+  Get,
   HttpStatus,
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ConnectionsService } from './connections.service';
@@ -22,6 +25,7 @@ import { RequiredRoles } from '../security/decorators/required-roles.decorator';
 import { AnyRequiredPermissionsMatch } from '../security/decorators/any-required-permissions-match.decorator';
 import { TeacherToStudentForm } from './dtos/teacher-to-student.form';
 import { TeacherToStudentDto } from './dtos/teacher-to-student.dto';
+import { TeacherToStudentQueryDto } from './dtos/teacher-to-student-query.dto';
 
 @ApiTags('connections')
 @Controller('connections')
@@ -33,7 +37,7 @@ export class ConnectionsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
-    type: StudentWithRoleDto,
+    type: TeacherToStudentDto,
   })
   @UseGuards(JwtAdminPermissionsGuard)
   @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUserProfiles)
@@ -59,6 +63,92 @@ export class ConnectionsController {
 
     const model = await this.connectionsService.requestTeacherToStudent(
       form,
+      currentUser,
+    );
+
+    return TeacherToStudentDto.fromModel(model);
+  }
+
+  @Get('teacher-to-student')
+  @ApiOperation({ summary: 'Find all teacher to student connections' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: TeacherToStudentDto,
+  })
+  public async findAllTeacherToStudent(
+    @Query() query: TeacherToStudentQueryDto,
+  ) {
+    const { models, remaining } =
+      await this.connectionsService.findAllTeacherToStudent(query);
+
+    return {
+      data: TeacherToStudentDto.fromModels(models),
+      remaining,
+    };
+  }
+
+  @Get('teacher-to-student/:id')
+  @ApiOperation({ summary: 'Find all teacher to student connections' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: TeacherToStudentDto,
+  })
+  public async findTeacherToStudentWithId(@Param('id') id: string) {
+    const model = await this.connectionsService.findTeacherToStudentWithId(id);
+
+    return TeacherToStudentDto.fromModel(model);
+  }
+
+  @Patch('teacher-to-student/:id')
+  @ApiOperation({ summary: 'Confirm teacher to student connection request' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: TeacherToStudentDto,
+  })
+  @UseGuards(JwtAdminPermissionsGuard)
+  @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUsers)
+  @RequiredRoles(UserRoleTypesEnum.Teacher, UserRoleTypesEnum.Student)
+  @RequiredPermissions(
+    UserRolePermissionsEnum.ConnectToTeachers,
+    UserRolePermissionsEnum.ConnectToStudents,
+  )
+  @AnyRequiredPermissionsMatch()
+  public async confirmTeacherToStudentWithId(
+    @Param('id') id: string,
+    @CurrentUser() currentUser: PayloadAccessDto,
+  ) {
+    const model = await this.connectionsService.confirmTeacherToStudentWithId(
+      id,
+      currentUser,
+    );
+
+    return TeacherToStudentDto.fromModel(model);
+  }
+
+  @Delete('teacher-to-student/:id')
+  @ApiOperation({ summary: 'Delete teacher to student connection' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: TeacherToStudentDto,
+  })
+  @UseGuards(JwtAdminPermissionsGuard)
+  @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUsers)
+  @RequiredRoles(UserRoleTypesEnum.Teacher, UserRoleTypesEnum.Student)
+  @RequiredPermissions(
+    UserRolePermissionsEnum.ConnectToTeachers,
+    UserRolePermissionsEnum.ConnectToStudents,
+  )
+  @AnyRequiredPermissionsMatch()
+  public async deleteTeacherToStudentWithId(
+    @Param('id') id: string,
+    @CurrentUser() currentUser: PayloadAccessDto,
+  ) {
+    const model = await this.connectionsService.deleteTeacherToStudentWithId(
+      id,
       currentUser,
     );
 
