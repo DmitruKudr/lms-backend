@@ -1,9 +1,9 @@
 import { UserRoleTypesEnum } from '@prisma/client';
-import { StatusDto } from '../../../shared/dtos/status.dto';
+import { StatusModelDto } from '../../../shared/dtos/status-model.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserWithRole } from '../types/user-with-role.interface';
+import { IUserModel } from '../types/user-model.interface';
 
-export class UserWithRoleDto extends StatusDto {
+export class UserDto extends StatusModelDto {
   @ApiProperty({
     description: 'User name',
     example: 'John Doe Junior',
@@ -36,33 +36,38 @@ export class UserWithRoleDto extends StatusDto {
   roleId!: string;
 
   @ApiProperty({
+    description: 'User avatar',
+    example: 'avatar.png',
+  })
+  avatar!: string;
+
+  @ApiProperty({
     description: 'User role title',
     example: 'default student',
   })
-  roleTitle!: string;
+  roleTitle?: string;
 
   @ApiProperty({
     description: 'User role type',
     enum: UserRoleTypesEnum,
   })
-  roleType!: UserRoleTypesEnum;
+  roleType?: UserRoleTypesEnum;
 
-  public static fromModel(userAndRole: UserWithRole, password?: string) {
-    const it = super.fromModel(userAndRole) as UserWithRoleDto;
-    it.name = userAndRole.name;
-    it.username = userAndRole.username;
-    it.email = userAndRole.email;
+  public static fromModel(model: IUserModel, password?: string) {
+    const it = super.fromModel(model) as UserDto;
+    it.name = model.name;
+    it.username = model.username;
+    it.email = model.email;
     password && (it.password = password);
-    it.roleId = userAndRole.roleId;
+    it.avatar = model.avatar;
+    it.roleId = model.roleId;
 
-    it.roleTitle = userAndRole.UserRole.title;
-    it.roleType = userAndRole.UserRole.type;
+    it.roleTitle = model.UserRole.title;
+    it.roleType = model.UserRole.type;
 
     return it;
   }
-  public static fromModels(userWithRoleList: UserWithRole[]) {
-    return !userWithRoleList?.map
-      ? []
-      : userWithRoleList.map((userWithRole) => this.fromModel(userWithRole));
+  public static fromModels(models: IUserModel[]) {
+    return !models?.map ? [] : models.map((model) => this.fromModel(model));
   }
 }

@@ -4,9 +4,9 @@ import {
   UserRolePermissionsEnum,
   UserRoleTypesEnum,
 } from '@prisma/client';
-import { StatusDto } from '../../../shared/dtos/status.dto';
+import { StatusModelDto } from '../../../shared/dtos/status-model.dto';
 
-export class UserRoleDto extends StatusDto {
+export class UserRoleDto extends StatusModelDto {
   @ApiProperty({
     description: 'User role title (in lowercase)',
   })

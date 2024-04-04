@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { Parser } from '../parsers/parser';
+import { TypeParser } from '../parsers/type-parser';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class BaseQueryDto {
@@ -7,12 +7,12 @@ export class BaseQueryDto {
   @IsOptional()
   queryLine?: string;
 
-  @Transform(({ value }) => Parser.toPositiveNumber(value))
+  @Transform(({ value }) => TypeParser.toPositiveNumber(value))
   @IsNumber()
   @IsOptional()
   pageNumber?: number;
 
-  @Transform(({ value }) => Parser.toPositiveNumber(value))
+  @Transform(({ value }) => TypeParser.toPositiveNumber(value))
   @IsNumber()
   @IsOptional()
   pageSize?: number;

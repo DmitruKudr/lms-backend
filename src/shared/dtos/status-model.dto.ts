@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseStatusesEnum } from '@prisma/client';
 
-export class StatusDto {
+export class StatusModelDto {
   @ApiProperty({
     description: 'Uuid',
     format: 'uuid',
@@ -25,8 +25,8 @@ export class StatusDto {
   })
   status!: BaseStatusesEnum;
 
-  public static fromModel(model: StatusDto, ...args: any[]) {
-    const it = new StatusDto();
+  public static fromModel(model: StatusModelDto, ...args: any[]) {
+    const it = new StatusModelDto();
     it.id = model.id;
     it.createdAt = model.createdAt;
     it.updatedAt = model.updatedAt;

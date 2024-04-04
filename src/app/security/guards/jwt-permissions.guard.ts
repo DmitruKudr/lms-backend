@@ -9,7 +9,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { UserRolePermissionsEnum } from '@prisma/client';
 import { PayloadAccessDto } from '../dtos/payload-access.dto';
-import { difference, isEmpty, includes } from 'lodash';
+import { difference, isEmpty, includes, intersection } from 'lodash';
 import { ErrorCodesEnum } from '../../../shared/enums/error-codes.enum';
 
 @Injectable()
@@ -18,8 +18,9 @@ export class JwtPermissionsGuard
   implements CanActivate
 {
   protected permissions: UserRolePermissionsEnum[];
+  protected anyPermissionsMatch: boolean;
 
-  constructor(private reflector: Reflector) {
+  constructor(protected reflector: Reflector) {
     super();
   }
 
@@ -29,6 +30,12 @@ export class JwtPermissionsGuard
         'required_permissions',
         context.getHandler(),
       ) || [];
+    this.anyPermissionsMatch =
+      this.reflector.get<boolean>(
+        'any_required_permissions_match',
+        context.getHandler(),
+      ) || false;
+
     return super.canActivate(context);
   }
 
@@ -50,6 +57,19 @@ export class JwtPermissionsGuard
     }
 
     if (includes(payload.permissions, UserRolePermissionsEnum.All)) {
+      return payload;
+    }
+
+    if (this.anyPermissionsMatch) {
+      if (intersection(this.permissions, payload.permissions).length === 0) {
+        throw new ForbiddenException({
+          statusCode: 403,
+          message: `${
+            ErrorCodesEnum.NotEnoughPermissions
+          } ${this.permissions.join(', ')} (match at least one permission)`,
+        });
+      }
+
       return payload;
     }
 

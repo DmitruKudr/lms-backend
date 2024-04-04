@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignUpForm } from './dtos/sign-up.form';
 import { PrismaService } from '../../prisma.service';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
@@ -11,7 +6,6 @@ import { SecurityService } from '../security/security.service';
 import { SignInForm } from './dtos/sign-in.form';
 import { verify } from 'argon2';
 import { UsersService } from '../users/users.service';
-import { UserRolesService } from '../user-roles/user-roles.service';
 
 @Injectable()
 export class AuthService {
@@ -19,46 +13,18 @@ export class AuthService {
     private prisma: PrismaService,
     private securityService: SecurityService,
     private usersService: UsersService,
-    private userRolesService: UserRolesService,
   ) {}
 
   public async signUp(form: SignUpForm) {
-    await this.usersService.doesUserExist(form.email);
-    const role = await this.userRolesService.findRoleWithTitle(form.role);
+    const newModel = await this.usersService.create(form);
 
-    const preparedForm = await SignUpForm.beforeCreation(form);
-    const newModel = await this.prisma.user.create({
-      data: {
-        ...preparedForm,
-        username: await this.usersService.generateUsername(preparedForm.name),
-        roleId: role.id,
-      },
-    });
-    await this.prisma[role.type].create({ data: { id: newModel.id } });
-
-    return await this.securityService.generateTokens(newModel, role);
+    return await this.securityService.generateTokens(newModel);
   }
 
   public async signIn(form: SignInForm) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: form.email },
+    const user = await this.usersService.findActiveUser({
+      email: form.email,
     });
-    if (!user) {
-      throw new BadRequestException({
-        statusCode: 404,
-        message: `${ErrorCodesEnum.NotFound}user with email ${form.email}`,
-      });
-    }
-
-    const role = await this.prisma.userRole.findUnique({
-      where: { id: user.roleId },
-    });
-    if (!role) {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: ErrorCodesEnum.NotFound + 'user role',
-      });
-    }
 
     if (!(await verify(user.password, form.password))) {
       throw new UnauthorizedException({
@@ -67,7 +33,7 @@ export class AuthService {
       });
     }
 
-    return await this.securityService.generateTokens(user, role);
+    return await this.securityService.generateTokens(user);
   }
 
   public async getAccessToken(refreshToken: string) {

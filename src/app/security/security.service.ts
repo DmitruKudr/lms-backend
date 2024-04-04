@@ -4,13 +4,13 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtTokensDto } from './dtos/jwt-tokens.dto';
-import { User, UserRole } from '@prisma/client';
 import { PayloadAccessDto } from './dtos/payload-access.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma.service';
 import { PayloadRefreshDto } from './dtos/payload-refresh.dto';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
+import { IUserModel } from '../users/types/user-model.interface';
 
 @Injectable()
 export class SecurityService {
@@ -20,7 +20,8 @@ export class SecurityService {
     private prisma: PrismaService,
   ) {}
 
-  public async generateTokens(userModel: User, roleModel: UserRole) {
+  public async generateTokens(userModel: IUserModel) {
+    const roleModel = await this.getRoleWithId(userModel.roleId);
     const payload = PayloadAccessDto.fromModel(userModel, roleModel);
     const accessToken = await this.jwtService.signAsync(
       { ...payload },
@@ -52,13 +53,11 @@ export class SecurityService {
       });
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: refreshPayload.id },
-    });
+    const user = await this.getUserWithId(refreshPayload.id);
     if (!user) {
       throw new UnauthorizedException({
         statusCode: 401,
-        message: ErrorCodesEnum.UserNotExists,
+        message: ErrorCodesEnum.UserDoesNotExist,
       });
     }
     const role = await this.prisma.userRole.findUnique({
@@ -80,7 +79,14 @@ export class SecurityService {
       },
     );
   }
-  public async getUserById(id: string) {
-    return this.prisma.user.findUnique({ where: { id: id } });
+  public async getUserWithId(id: string) {
+    return (await this.prisma.user.findUnique({
+      where: { id: id },
+      include: { UserRole: { select: { title: true, type: true } } },
+    })) as IUserModel;
+  }
+
+  public async getRoleWithId(id: string) {
+    return this.prisma.userRole.findUnique({ where: { id: id } });
   }
 }

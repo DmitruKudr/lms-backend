@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ========================= base statuses enum =========================
+// ========================= base_statuses_enum =========================
 
 enum BaseStatusesEnum {
   Active
@@ -18,7 +18,7 @@ enum BaseStatusesEnum {
 
 // ========================= users =========================
 
-// ===== user roles =====
+// ===== user_roles =====
 
 model UserRole {
   id        String           @id @default(uuid())
@@ -48,14 +48,14 @@ enum UserRoleTypesEnum {
 }
 
 enum UserRolePermissionsEnum {
-  // ===== super admins =====
+  // ===== super admin permissions =====
   All
   CreateSpecialUsers
   ManageUsers
   ManageAdmins
   ManageUserRoles
   ArchiveEverything
-  // ===== admins =====
+  // ===== admin permissions =====
   CreateDefaultUsers
   CreateTests
   CreateTodos
@@ -71,7 +71,7 @@ enum UserRolePermissionsEnum {
   FindAllTodos
   FindAllGroups
   FindAllComments
-  // ===== users =====
+  // ===== user permissions =====
   CreateMyTests
   CreateMyGroups
   CreateTodosForMyself
@@ -80,9 +80,9 @@ enum UserRolePermissionsEnum {
   ManageMyTests
   ManageMyTodos
   ManageMyStudentsTodos
-  AddStudents
-  AddTeachers
-  AddParents
+  ConnectToStudents
+  ConnectToTeachers
+  ConnectToParents
 
   @@map("user_role_permissions_enum")
 }
@@ -95,12 +95,12 @@ model User {
   updatedAt DateTime         @updatedAt @map("updated_at")
   status    BaseStatusesEnum @default(Active)
 
-  name     String
-  username String  @unique
-  email    String? @unique
-  password String
-  avatar   String?
-  link     String? @unique
+  name         String
+  username     String  @unique
+  email        String? @unique
+  password     String
+  avatar       String?
+  recoveryLink String? @unique @map("recovery_link")
 
   UserRole UserRole @relation(fields: [roleId], references: [id])
   roleId   String   @map("role_id")
@@ -134,9 +134,9 @@ model Student {
 
   User User @relation(fields: [id], references: [id])
 
-  Parents  Parent[]
-  Teachers Teacher[]
   Groups   Group[]
+  Teachers TeacherToStudent[]
+  Parents  Parent[]
 
   @@map("students")
 }
@@ -144,13 +144,14 @@ model Student {
 // ===== teachers =====
 
 model Teacher {
-  id          String  @id @unique
-  institution String?
-  post        String?
+  id             String  @id @unique
+  institution    String?
+  post           String?
+  invitationLink String? @unique @map("invitation_link")
 
   User User @relation(fields: [id], references: [id])
 
-  Students Student[]
+  Students TeacherToStudent[]
   Groups   Group[]
   Subjects Subject[]
   Tests    Test[]
@@ -160,6 +161,29 @@ model Teacher {
   @@map("teachers")
 }
 
+// ===== teacher_to_student =====
+
+model TeacherToStudent {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  confirmationStatus TeacherToStudentStatusesEnum @map("confirmation_status")
+
+  Teacher   Teacher @relation(fields: [teacherId], references: [id])
+  teacherId String  @map("teacher_id")
+  Student   Student @relation(fields: [studentId], references: [id])
+  studentId String  @map("student_id")
+
+  @@map("teacher_to_student")
+}
+
+enum TeacherToStudentStatusesEnum {
+  NeedsStudentConfirmation
+  NeedsTeacherConfirmation
+  Confirmed
+}
+
 // ========================= groups =========================
 
 model Group {
@@ -167,23 +191,14 @@ model Group {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  title       String
-  groupStatus GroupStatusesEnum @default(Regular) @map("group_status")
+  title          String
+  isPersonal     Boolean @map("is_personal")
+  invitationLink String? @unique @map("invitation_link")
 
-  Teacher   Teacher @relation(fields: [teacherId], references: [id])
-  teacherId String  @map("teacher_id")
-
+  Teachers Teacher[]
   Students Student[]
 
   @@map("groups")
-}
-
-enum GroupStatusesEnum {
-  Regular
-  Marked
-  Hidden
-
-  @@map("group_statuses_enum")
 }
 
 // ========================= subjects =========================
@@ -265,7 +280,7 @@ enum TestStatusesEnum {
   @@map("test_statuses_enum")
 }
 
-// ===== test items =====
+// ===== test_items =====
 
 model TestItem {
   id        String   @id @default(uuid())
@@ -316,7 +331,7 @@ enum TestItemOptionTypesEnum {
   @@map("test_item_option_types_enum")
 }
 
-// ===== test item answers =====
+// ===== test_item_answers =====
 
 model TestItemAnswer {
   id        String   @id @default(uuid())
@@ -331,7 +346,7 @@ model TestItemAnswer {
   @@map("test_item_answers")
 }
 
-// ===== test item options =====
+// ===== test_item_options =====
 
 model TestItemOption {
   id        String   @id @default(uuid())
@@ -382,7 +397,7 @@ enum TodoStatusesEnum {
   @@map("todo_statuses_enum")
 }
 
-// ===== todo items =====
+// ===== todo_items =====
 
 model TodoItem {
   id        String   @id @default(uuid())

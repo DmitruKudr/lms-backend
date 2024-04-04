@@ -9,8 +9,6 @@ import {
   validate,
 } from 'class-validator';
 import { DefaultRoleTitlesEnum } from '../../../shared/enums/default-role-titles.enum';
-import { hash } from 'argon2';
-import { CreateUserFormTypes } from '../types/create-user-forms.type';
 
 export class CreateDefaultUserForm {
   @ApiProperty({
@@ -30,7 +28,7 @@ export class CreateDefaultUserForm {
       'name must not contain digits',
   })
   @IsOptional()
-  name: string;
+  name?: string;
 
   @ApiProperty({
     description: 'User email',
@@ -68,15 +66,6 @@ export class CreateDefaultUserForm {
     it.email = form.email;
     it.password = form.password;
     it.roleTitle = form.roleTitle;
-
-    return it;
-  }
-
-  public static async beforeCreation(form: CreateUserFormTypes) {
-    const it = new CreateDefaultUserForm();
-    it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);
-    it.email = form.email;
-    it.password = await hash(form.password);
 
     return it;
   }

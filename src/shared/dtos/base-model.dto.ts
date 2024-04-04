@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class BaseDto {
+export class BaseModelDto {
   @ApiProperty({
     description: 'Uuid',
     format: 'uuid',
@@ -17,8 +17,8 @@ export class BaseDto {
   })
   updatedAt!: Date;
 
-  public static fromModel(model: BaseDto, ...args: any[]) {
-    const it = new BaseDto();
+  public static fromModel(model: BaseModelDto, ...args: any[]) {
+    const it = new BaseModelDto();
     it.id = model.id;
     it.createdAt = model.createdAt;
     it.updatedAt = model.updatedAt;

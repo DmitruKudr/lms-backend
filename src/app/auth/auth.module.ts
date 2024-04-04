@@ -3,12 +3,11 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { PrismaService } from '../../prisma.service';
 import { SecurityModule } from '../security/security.module';
-import { UsersService } from '../users/users.service';
-import { UserRolesService } from '../user-roles/user-roles.service';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [SecurityModule],
+  imports: [SecurityModule, UsersModule],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, UsersService, UserRolesService],
+  providers: [AuthService, PrismaService],
 })
 export class AuthModule {}
