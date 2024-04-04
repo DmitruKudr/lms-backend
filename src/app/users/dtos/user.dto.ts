@@ -1,9 +1,9 @@
 import { UserRoleTypesEnum } from '@prisma/client';
 import { StatusModelDto } from '../../../shared/dtos/status-model.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IUserWithRole } from '../types/user-with-role.interface';
+import { IUserModel } from '../types/user-model.interface';
 
-export class UserWithRoleDto extends StatusModelDto {
+export class UserDto extends StatusModelDto {
   @ApiProperty({
     description: 'User name',
     example: 'John Doe Junior',
@@ -53,8 +53,8 @@ export class UserWithRoleDto extends StatusModelDto {
   })
   roleType?: UserRoleTypesEnum;
 
-  public static fromModel(model: IUserWithRole, password?: string) {
-    const it = super.fromModel(model) as UserWithRoleDto;
+  public static fromModel(model: IUserModel, password?: string) {
+    const it = super.fromModel(model) as UserDto;
     it.name = model.name;
     it.username = model.username;
     it.email = model.email;
@@ -67,7 +67,7 @@ export class UserWithRoleDto extends StatusModelDto {
 
     return it;
   }
-  public static fromModels(models: IUserWithRole[]) {
+  public static fromModels(models: IUserModel[]) {
     return !models?.map ? [] : models.map((model) => this.fromModel(model));
   }
 }

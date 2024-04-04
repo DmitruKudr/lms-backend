@@ -7,7 +7,7 @@ import { PrismaService } from '../../prisma.service';
 import { CreateSpecialStudentForm } from './dtos/create-special-student.form';
 import { UsersService } from '../users/users.service';
 import { BaseStatusesEnum, UserRoleTypesEnum } from '@prisma/client';
-import { IStudentWithRole } from './types/student-with-role.interface';
+import { IStudentModel } from './types/student-model.interface';
 import { hash } from 'argon2';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { UserRolesService } from '../user-roles/user-roles.service';
@@ -56,7 +56,7 @@ export class StudentsService {
         Student: { select: { institution: true, birthDate: true } },
         UserRole: { select: { title: true, type: true } },
       },
-    })) as IStudentWithRole;
+    })) as IStudentModel;
   }
 
   public async findActive(query: BaseQueryDto) {
@@ -83,7 +83,7 @@ export class StudentsService {
       },
       take: take,
       skip: skip,
-    })) as IStudentWithRole[];
+    })) as IStudentModel[];
 
     let remaining = await this.prisma.user.count({
       where: {
@@ -115,7 +115,7 @@ export class StudentsService {
         Student: { select: { institution: true, birthDate: true } },
         UserRole: { select: { title: true, type: true } },
       },
-    })) as IStudentWithRole;
+    })) as IStudentModel;
 
     if (!model) {
       throw new NotFoundException({
@@ -163,7 +163,7 @@ export class StudentsService {
           Student: { select: { birthDate: true, institution: true } },
           UserRole: { select: { title: true, type: true } },
         },
-      })) as IStudentWithRole;
+      })) as IStudentModel;
     } catch {
       throw new NotFoundException({
         statusCode: 404,

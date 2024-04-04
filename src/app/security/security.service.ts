@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma.service';
 import { PayloadRefreshDto } from './dtos/payload-refresh.dto';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
-import { IUserWithRole } from '../users/types/user-with-role.interface';
+import { IUserModel } from '../users/types/user-model.interface';
 
 @Injectable()
 export class SecurityService {
@@ -20,7 +20,7 @@ export class SecurityService {
     private prisma: PrismaService,
   ) {}
 
-  public async generateTokens(userModel: IUserWithRole) {
+  public async generateTokens(userModel: IUserModel) {
     const roleModel = await this.getRoleWithId(userModel.roleId);
     const payload = PayloadAccessDto.fromModel(userModel, roleModel);
     const accessToken = await this.jwtService.signAsync(
@@ -83,7 +83,7 @@ export class SecurityService {
     return (await this.prisma.user.findUnique({
       where: { id: id },
       include: { UserRole: { select: { title: true, type: true } } },
-    })) as IUserWithRole;
+    })) as IUserModel;
   }
 
   public async getRoleWithId(id: string) {

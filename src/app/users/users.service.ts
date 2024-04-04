@@ -11,7 +11,7 @@ import {
   UserRoleTypesEnum,
 } from '@prisma/client';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
-import { IUserWithRole } from './types/user-with-role.interface';
+import { IUserModel } from './types/user-model.interface';
 import { UserRolesService } from '../user-roles/user-roles.service';
 import { UserQueryDto } from './dtos/user-query.dto';
 import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
@@ -55,7 +55,7 @@ export class UsersService {
         title: role.title,
         type: role.type,
       },
-    } as IUserWithRole;
+    } as IUserModel;
   }
 
   public async findActiveUsers(query: UserQueryDto) {
@@ -79,7 +79,7 @@ export class UsersService {
       include: { UserRole: { select: { title: true, type: true } } },
       take: take,
       skip: skip,
-    })) as IUserWithRole[];
+    })) as IUserModel[];
 
     let remaining = await this.prisma.user.count({
       where: {
@@ -121,7 +121,7 @@ export class UsersService {
       include: { UserRole: { select: { title: true, type: true } } },
       take: take,
       skip: skip,
-    })) as IUserWithRole[];
+    })) as IUserModel[];
 
     let remaining = await this.prisma.user.count({
       where: {
@@ -152,7 +152,7 @@ export class UsersService {
           username: await this.generateUsername('Activated User'),
         },
         include: { UserRole: { select: { title: true, type: true } } },
-      })) as IUserWithRole;
+      })) as IUserModel;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
@@ -167,7 +167,7 @@ export class UsersService {
         where: { id: id },
         data: { status: BaseStatusesEnum.Archived },
         include: { UserRole: { select: { title: true, type: true } } },
-      })) as IUserWithRole;
+      })) as IUserModel;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
@@ -223,7 +223,7 @@ export class UsersService {
       }
     }
 
-    return user as IUserWithRole;
+    return user as IUserModel;
   }
 
   public async doesActiveUserAlreadyExist(
@@ -239,7 +239,7 @@ export class UsersService {
         status: BaseStatusesEnum.Active,
       },
       include: { UserRole: { select: { title: true, type: true } } },
-    })) as IUserWithRole;
+    })) as IUserModel;
     if (user) {
       throw new BadRequestException({
         statusCode: 400,

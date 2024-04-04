@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ConnectionsService } from './connections.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { StudentWithRoleDto } from '../students/dtos/student-with-role.dto';
+import { StudentDto } from '../students/dtos/student.dto';
 import { JwtAdminPermissionsGuard } from '../security/guards/jwt-admin-permissions.guard';
 import { RequiredAdminPermissions } from '../security/decorators/requierd-admin-permissions.decorator';
 import { UserRolePermissionsEnum, UserRoleTypesEnum } from '@prisma/client';

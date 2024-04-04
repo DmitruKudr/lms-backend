@@ -18,7 +18,7 @@ import { RequiredPermissions } from '../security/decorators/required-permissions
 import { UserRolePermissionsEnum } from '@prisma/client';
 import { CreateDefaultUserForm } from './dtos/create-default-user.form';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
-import { UserWithRoleDto } from './dtos/user-with-role.dto';
+import { UserDto } from './dtos/user.dto';
 import { CreateSpecialUserForm } from './dtos/create-special-user.form';
 import { UserQueryDto } from './dtos/user-query.dto';
 import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
@@ -33,7 +33,7 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
-    type: UserWithRoleDto,
+    type: UserDto,
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.CreateDefaultUsers)
@@ -49,7 +49,7 @@ export class UsersController {
     }
     const model = await this.usersService.create(form);
 
-    return UserWithRoleDto.fromModel(model, form.password);
+    return UserDto.fromModel(model, form.password);
   }
 
   @Post('special-users')
@@ -57,7 +57,7 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
-    type: UserWithRoleDto,
+    type: UserDto,
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.CreateSpecialUsers)
@@ -73,7 +73,7 @@ export class UsersController {
     }
     const model = await this.usersService.create(form);
 
-    return UserWithRoleDto.fromModel(model, form.password);
+    return UserDto.fromModel(model, form.password);
   }
 
   @Get()
@@ -81,7 +81,7 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
-    type: UserWithRoleDto,
+    type: UserDto,
     isArray: true,
   })
   public async findActiveUsers(@Query() query: UserQueryDto) {
@@ -89,7 +89,7 @@ export class UsersController {
       query,
     );
 
-    return { data: UserWithRoleDto.fromModels(models), remaining };
+    return { data: UserDto.fromModels(models), remaining };
   }
 
   @Get('admins')
@@ -97,7 +97,7 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
-    type: UserWithRoleDto,
+    type: UserDto,
     isArray: true,
   })
   @UseGuards(JwtPermissionsGuard)
@@ -105,7 +105,7 @@ export class UsersController {
   public async findAllAdmins(@Query() query: BaseQueryDto) {
     const { models, remaining } = await this.usersService.findAllAdmins(query);
 
-    return { data: UserWithRoleDto.fromModels(models), remaining };
+    return { data: UserDto.fromModels(models), remaining };
   }
 
   @Put(':id')
@@ -113,14 +113,14 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
-    type: UserWithRoleDto,
+    type: UserDto,
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ArchiveEverything)
   public async activateWithId(@Param('id') id: string) {
     const model = await this.usersService.activateWithId(id);
 
-    return UserWithRoleDto.fromModel(model);
+    return UserDto.fromModel(model);
   }
 
   @Delete(':id')
@@ -128,13 +128,13 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
-    type: UserWithRoleDto,
+    type: UserDto,
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.ArchiveEverything)
   public async archiveWithId(@Param('id') id: string) {
     const model = await this.usersService.archiveWithId(id);
 
-    return UserWithRoleDto.fromModel(model);
+    return UserDto.fromModel(model);
   }
 }

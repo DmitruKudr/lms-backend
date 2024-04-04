@@ -1,7 +1,7 @@
-import { BaseStatusesEnum, UserRoleTypesEnum } from '@prisma/client';
+import { UserRoleTypesEnum } from '@prisma/client';
 import { IStatusModel } from '../../../shared/types/status-model.interface';
 
-export interface IUserWithRole extends IStatusModel {
+export interface IUserModel extends IStatusModel {
   name: string;
   username: string;
   email: string;

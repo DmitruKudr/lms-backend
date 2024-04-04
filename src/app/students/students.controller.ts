@@ -20,7 +20,7 @@ import { RequiredPermissions } from '../security/decorators/required-permissions
 import { JwtPermissionsGuard } from '../security/guards/jwt-permissions.guard';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { CreateSpecialStudentForm } from './dtos/create-special-student.form';
-import { StudentWithRoleDto } from './dtos/student-with-role.dto';
+import { StudentDto } from './dtos/student.dto';
 import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
 import { CreateDefaultStudentForm } from './dtos/create-default-student.form';
 import { RequiredAdminPermissions } from '../security/decorators/requierd-admin-permissions.decorator';
@@ -39,7 +39,7 @@ export class StudentsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
-    type: StudentWithRoleDto,
+    type: StudentDto,
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.CreateSpecialUsers)
@@ -55,7 +55,7 @@ export class StudentsController {
     }
     const model = await this.studentsService.create(form);
 
-    return StudentWithRoleDto.fromModel(model, form.password);
+    return StudentDto.fromModel(model, form.password);
   }
 
   @Post('special-students')
@@ -63,7 +63,7 @@ export class StudentsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:201:OK',
-    type: StudentWithRoleDto,
+    type: StudentDto,
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.CreateSpecialUsers)
@@ -79,20 +79,20 @@ export class StudentsController {
     }
     const model = await this.studentsService.create(form);
 
-    return StudentWithRoleDto.fromModel(model, form.password);
+    return StudentDto.fromModel(model, form.password);
   }
   @Get()
   @ApiOperation({ summary: 'Find active students' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
-    type: StudentWithRoleDto,
+    type: StudentDto,
     isArray: true,
   })
   public async findActive(@Query() query: BaseQueryDto) {
     const { models, remaining } = await this.studentsService.findActive(query);
 
-    return { data: StudentWithRoleDto.fromModels(models), remaining };
+    return { data: StudentDto.fromModels(models), remaining };
   }
 
   @Get(':id')
@@ -100,13 +100,13 @@ export class StudentsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
-    type: StudentWithRoleDto,
+    type: StudentDto,
     isArray: true,
   })
   public async findActiveWithId(@Param('id') id: string) {
     const model = await this.studentsService.findActiveWithId(id);
 
-    return StudentWithRoleDto.fromModel(model);
+    return StudentDto.fromModel(model);
   }
 
   @Patch(':id')
@@ -114,7 +114,7 @@ export class StudentsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
-    type: StudentWithRoleDto,
+    type: StudentDto,
   })
   @UseGuards(JwtAdminPermissionsGuard)
   @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUserProfiles)
@@ -143,6 +143,6 @@ export class StudentsController {
       currentUser,
     );
 
-    return StudentWithRoleDto.fromModel(model, form.password);
+    return StudentDto.fromModel(model, form.password);
   }
 }
