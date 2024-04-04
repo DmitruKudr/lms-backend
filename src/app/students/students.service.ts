@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
-import { CreateSpecialStudentForm } from './dtos/create-special-student.form';
 import { UsersService } from '../users/users.service';
 import { BaseStatusesEnum, UserRoleTypesEnum } from '@prisma/client';
 import { IStudentModel } from './types/student-model.interface';
@@ -14,6 +13,7 @@ import { UserRolesService } from '../user-roles/user-roles.service';
 import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
 import { UpdateStudentForm } from './dtos/update-student.form';
 import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
+import { TCreateStudentForms } from './types/create-student-forms.type';
 
 @Injectable()
 export class StudentsService {
@@ -23,7 +23,7 @@ export class StudentsService {
     private userRolesService: UserRolesService,
   ) {}
 
-  public async create(form: CreateSpecialStudentForm) {
+  public async create(form: TCreateStudentForms) {
     await this.usersService.doesActiveUserAlreadyExist({ email: form.email });
 
     const role = await this.userRolesService.findRoleWithTitle(form.roleTitle);
