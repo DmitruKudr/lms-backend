@@ -13,7 +13,7 @@ import {
 import { StudentsService } from './students.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAdminPermissionsGuard } from '../security/guards/jwt-admin-permissions.guard';
-import { UserRolePermissionsEnum } from '@prisma/client';
+import { UserRolePermissionsEnum, UserRoleTypesEnum } from '@prisma/client';
 import { RequiredPermissions } from '../security/decorators/required-permissions.decorator';
 import { JwtPermissionsGuard } from '../security/guards/jwt-permissions.guard';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
@@ -25,6 +25,7 @@ import { RequiredAdminPermissions } from '../security/decorators/requierd-admin-
 import { UpdateStudentForm } from './dtos/update-student.form';
 import { CurrentUser } from '../security/decorators/current-user.decorator';
 import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
+import { RequiredRoles } from '../security/decorators/required-roles.decorator';
 
 @ApiTags('students')
 @Controller('students')
@@ -115,6 +116,7 @@ export class StudentsController {
   })
   @UseGuards(JwtAdminPermissionsGuard)
   @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUserProfiles)
+  @RequiredRoles(UserRoleTypesEnum.Student)
   @RequiredPermissions(UserRolePermissionsEnum.ManageMyProfile)
   public async updateWithId(
     @Param('id') id: string,
