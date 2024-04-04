@@ -6,10 +6,13 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -22,6 +25,15 @@ import { UserDto } from './dtos/user.dto';
 import { CreateSpecialUserForm } from './dtos/create-special-user.form';
 import { UserQueryDto } from './dtos/user-query.dto';
 import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
+import { JwtAdminPermissionsGuard } from '../security/guards/jwt-admin-permissions.guard';
+import { RequiredAdminPermissions } from '../security/decorators/requierd-admin-permissions.decorator';
+import { CurrentUser } from '../security/decorators/current-user.decorator';
+import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
+import { ChangeEmailForm } from './dtos/change-email.form';
+import { ChangePasswordForm } from './dtos/change-password-form';
+import { ChangeUsernameForm } from './dtos/change-username.form';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileTypesEnum } from '../../shared/enums/file-types.enum';
 
 @ApiTags('users')
 @Controller('users')
@@ -71,6 +83,7 @@ export class UsersController {
         errors,
       });
     }
+
     const model = await this.usersService.create(form);
 
     return UserDto.fromModel(model, form.password);
@@ -106,6 +119,133 @@ export class UsersController {
     const { models, remaining } = await this.usersService.findAllAdmins(query);
 
     return { data: UserDto.fromModels(models), remaining };
+  }
+
+  @Patch('username/:id')
+  @ApiOperation({ summary: 'Change user username with id' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: UserDto,
+  })
+  @UseGuards(JwtAdminPermissionsGuard)
+  @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUsers)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageMyProfile)
+  public async changeUsernameWithId(
+    @Param('id') id: string,
+    @Body() body: ChangeUsernameForm,
+    @CurrentUser() currentUser: PayloadAccessDto,
+  ) {
+    const form = ChangeUsernameForm.from(body);
+    const errors = await ChangeUsernameForm.validate(form);
+    if (errors) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.InvalidForm,
+        errors,
+      });
+    }
+
+    const model = await this.usersService.changeUsernameWithId(
+      id,
+      form,
+      currentUser,
+    );
+
+    return UserDto.fromModel(model);
+  }
+
+  @Patch('email/:id')
+  @ApiOperation({ summary: 'Change user email with id' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: UserDto,
+  })
+  @UseGuards(JwtAdminPermissionsGuard)
+  @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUsers)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageMyProfile)
+  public async changeEmailWithId(
+    @Param('id') id: string,
+    @Body() body: ChangeEmailForm,
+    @CurrentUser() currentUser: PayloadAccessDto,
+  ) {
+    const form = ChangeEmailForm.from(body);
+    const errors = await ChangeEmailForm.validate(form);
+    if (errors) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.InvalidForm,
+        errors,
+      });
+    }
+
+    const model = await this.usersService.changeEmailWithId(
+      id,
+      form,
+      currentUser,
+    );
+
+    return UserDto.fromModel(model);
+  }
+
+  @Patch('password/:id')
+  @ApiOperation({ summary: 'Change user password with id' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: UserDto,
+  })
+  @UseGuards(JwtAdminPermissionsGuard)
+  @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUsers)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageMyProfile)
+  public async changePasswordWithId(
+    @Param('id') id: string,
+    @Body() body: ChangePasswordForm,
+    @CurrentUser() currentUser: PayloadAccessDto,
+  ) {
+    const form = ChangePasswordForm.from(body);
+    const errors = await ChangePasswordForm.validate(form);
+    if (errors) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: ErrorCodesEnum.InvalidForm,
+        errors,
+      });
+    }
+
+    const model = await this.usersService.changePasswordWithId(
+      id,
+      form,
+      currentUser,
+    );
+
+    return UserDto.fromModel(model, form.newPassword);
+  }
+
+  @Patch('avatar/:id')
+  @ApiOperation({ summary: 'Change user avatar with id' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: UserDto,
+  })
+  @UseGuards(JwtAdminPermissionsGuard)
+  @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUsers)
+  @RequiredPermissions(UserRolePermissionsEnum.ManageMyProfile)
+  @UseInterceptors(FileInterceptor(FileTypesEnum.Avatar))
+  public async changeAvatarWithId(
+    @Param('id') id: string,
+    @UploadedFile() avatar: Express.Multer.File,
+    @CurrentUser() currentUser: PayloadAccessDto,
+  ) {
+    const model = await this.usersService.changeAvatarWithId(
+      id,
+      avatar,
+      currentUser,
+    );
+
+    return UserDto.fromModel(model);
   }
 
   @Put(':id')

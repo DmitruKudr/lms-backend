@@ -14,17 +14,43 @@ export class FilesService {
     }
 
     const fileName = `${uuidv4()}.${file.originalname}`;
-    // await fs.promises.writeFile(
-    //   path.resolve(
-    //     __dirname,
-    //     '../../..',
-    //     'src/temp-files',
-    //     file.fieldname,
-    //     fileName,
-    //   ),
-    //   file.buffer,
-    // );
+    await fs.promises.writeFile(
+      path.resolve(
+        __dirname,
+        '../../..',
+        'src/temp-files',
+        file.fieldname,
+        fileName,
+      ),
+      file.buffer,
+    );
 
     return fileName;
+  }
+
+  public async tempReplaceFile(newFile: IFileValue, oldFilePath: string) {
+    if (!newFile) {
+      return null;
+    }
+
+    if (oldFilePath) {
+      await fs.promises.unlink(
+        path.resolve(__dirname, '../../..', 'src/temp-files', oldFilePath),
+      );
+    }
+
+    const newFileName = `${uuidv4()}.${newFile.originalname}`;
+    await fs.promises.writeFile(
+      path.resolve(
+        __dirname,
+        '../../..',
+        'src/temp-files',
+        newFile.fieldname,
+        newFileName,
+      ),
+      newFile.buffer,
+    );
+
+    return newFileName;
   }
 }

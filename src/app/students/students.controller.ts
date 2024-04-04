@@ -8,9 +8,7 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -25,7 +23,6 @@ import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
 import { CreateDefaultStudentForm } from './dtos/create-default-student.form';
 import { RequiredAdminPermissions } from '../security/decorators/requierd-admin-permissions.decorator';
 import { UpdateStudentForm } from './dtos/update-student.form';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '../security/decorators/current-user.decorator';
 import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
 
@@ -119,11 +116,9 @@ export class StudentsController {
   @UseGuards(JwtAdminPermissionsGuard)
   @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUserProfiles)
   @RequiredPermissions(UserRolePermissionsEnum.ManageMyProfile)
-  @UseInterceptors(FileInterceptor('avatar'))
   public async updateWithId(
     @Param('id') id: string,
     @Body() body: UpdateStudentForm,
-    @UploadedFile() avatar: Express.Multer.File,
     @CurrentUser() currentUser: PayloadAccessDto,
   ) {
     const form = UpdateStudentForm.from(body);
@@ -139,10 +134,9 @@ export class StudentsController {
     const model = await this.studentsService.updateWithId(
       id,
       form,
-      avatar,
       currentUser,
     );
 
-    return StudentDto.fromModel(model, form.password);
+    return StudentDto.fromModel(model);
   }
 }

@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignUpForm } from './dtos/sign-up.form';
 import { PrismaService } from '../../prisma.service';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';

@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { ConnectionsService } from './connections.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { StudentDto } from '../students/dtos/student.dto';
 import { JwtAdminPermissionsGuard } from '../security/guards/jwt-admin-permissions.guard';
 import { RequiredAdminPermissions } from '../security/decorators/requierd-admin-permissions.decorator';
 import { UserRolePermissionsEnum, UserRoleTypesEnum } from '@prisma/client';
@@ -33,7 +32,7 @@ export class ConnectionsController {
   constructor(private readonly connectionsService: ConnectionsService) {}
 
   @Post('teacher-to-student')
-  @ApiOperation({ summary: 'Send teacher to student connection request' })
+  @ApiOperation({ summary: 'Send teacher-to-student connection request' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
@@ -70,7 +69,7 @@ export class ConnectionsController {
   }
 
   @Get('teacher-to-student')
-  @ApiOperation({ summary: 'Find all teacher to student connections' })
+  @ApiOperation({ summary: 'Find all teacher-to-student connections' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
@@ -89,7 +88,7 @@ export class ConnectionsController {
   }
 
   @Get('teacher-to-student/:id')
-  @ApiOperation({ summary: 'Find all teacher to student connections' })
+  @ApiOperation({ summary: 'Find teacher-to-student connection with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
@@ -102,7 +101,7 @@ export class ConnectionsController {
   }
 
   @Patch('teacher-to-student/:id')
-  @ApiOperation({ summary: 'Confirm teacher to student connection request' })
+  @ApiOperation({ summary: 'Confirm teacher-to-student connection request' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
@@ -129,7 +128,7 @@ export class ConnectionsController {
   }
 
   @Delete('teacher-to-student/:id')
-  @ApiOperation({ summary: 'Delete teacher to student connection' })
+  @ApiOperation({ summary: 'Delete teacher-to-student connection' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',

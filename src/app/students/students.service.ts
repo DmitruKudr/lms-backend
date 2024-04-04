@@ -12,8 +12,6 @@ import { hash } from 'argon2';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { UserRolesService } from '../user-roles/user-roles.service';
 import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
-import { FilesService } from '../files/files.service';
-import { IFileValue } from '../../shared/types/file-value.interface';
 import { UpdateStudentForm } from './dtos/update-student.form';
 import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
 
@@ -23,7 +21,6 @@ export class StudentsService {
     private prisma: PrismaService,
     private usersService: UsersService,
     private userRolesService: UserRolesService,
-    private filesService: FilesService,
   ) {}
 
   public async create(form: CreateSpecialStudentForm) {
@@ -130,26 +127,15 @@ export class StudentsService {
   public async updateWithId(
     id: string,
     form: UpdateStudentForm,
-    avatar: IFileValue,
     currentUser: PayloadAccessDto,
   ) {
     this.usersService.isCurrentUser(currentUser, id);
-    await this.usersService.doesActiveUserAlreadyExist({
-      email: form.email,
-      username: form.username,
-    });
-
-    const fileName = await this.filesService.tempSaveFile(avatar);
 
     try {
       return (await this.prisma.user.update({
         where: { id: id, status: BaseStatusesEnum.Active },
         data: {
           name: form.name,
-          username: form.username,
-          email: form.email,
-          password: form.password ? await hash(form.password) : undefined,
-          avatar: fileName,
           Student: {
             update: {
               data: {

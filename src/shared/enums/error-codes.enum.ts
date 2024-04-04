@@ -24,6 +24,7 @@ export enum ErrorCodesEnum {
   NotAdminRole = 'errors.invalid-form.user-role-must-be-not-admin: ',
   InvalidRole = 'errors.invalid-form.user-role-must-be: ',
   NotIdParameter = 'errors.parameter.parameter-must-be-in-id-format: ',
+  InvalidOldPassword = 'errors.invalid-form.old-password-is-invalid: ',
 
   // ===== file validation =====
   InvalidFileSize = 'errors.invalid-form.file-size-must-be-less-than: ',
