@@ -80,15 +80,17 @@ export class StudentsController {
     return StudentDto.fromModel(model, form.password);
   }
   @Get()
-  @ApiOperation({ summary: 'Find active students' })
+  @ApiOperation({ summary: 'Find all active students' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
     type: StudentDto,
     isArray: true,
   })
-  public async findActive(@Query() query: BaseQueryDto) {
-    const { models, remaining } = await this.studentsService.findActive(query);
+  public async findAllActive(@Query() query: BaseQueryDto) {
+    const { models, remaining } = await this.studentsService.findAllActive(
+      query,
+    );
 
     return { data: StudentDto.fromModels(models), remaining };
   }
