@@ -76,6 +76,8 @@ export class CreateDefaultTeacherForm {
   @IsOptional()
   post?: string;
 
+  subjects: string[];
+
   public static from(form: CreateDefaultTeacherForm) {
     const it = new CreateDefaultTeacherForm();
     it.name = form.name || 'New ' + this.capitalizeFirstLetters(form.roleTitle);

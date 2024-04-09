@@ -25,7 +25,7 @@ export class TeacherDto extends UserDto {
     const it = super.fromModel(model, password) as TeacherDto;
     it.institution = model.Teacher.institution;
     it.post = model.Teacher.post;
-    it.subjects = model.Subjects.map((subject) => subject.title);
+    it.subjects = model.Teacher.Subjects.map((subject) => subject.title);
 
     return it;
   }

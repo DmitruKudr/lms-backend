@@ -32,7 +32,7 @@ import { RequiredRoles } from '../security/decorators/required-roles.decorator';
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
-  @Post('default-students')
+  @Post('default')
   @ApiOperation({ summary: 'Create new default student' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -41,7 +41,7 @@ export class StudentsController {
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.CreateSpecialUsers)
-  public async createDefaultStudent(@Body() body: CreateDefaultStudentForm) {
+  public async createDefault(@Body() body: CreateDefaultStudentForm) {
     const form = CreateDefaultStudentForm.from(body);
     const errors = await CreateDefaultStudentForm.validate(form);
     if (errors) {
@@ -56,7 +56,7 @@ export class StudentsController {
     return StudentDto.fromModel(model, form.password);
   }
 
-  @Post('special-students')
+  @Post('special')
   @ApiOperation({ summary: 'Create new special student' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -65,7 +65,7 @@ export class StudentsController {
   })
   @UseGuards(JwtPermissionsGuard)
   @RequiredPermissions(UserRolePermissionsEnum.CreateSpecialUsers)
-  public async createSpecialStudent(@Body() body: CreateSpecialStudentForm) {
+  public async createSpecial(@Body() body: CreateSpecialStudentForm) {
     const form = CreateSpecialStudentForm.from(body);
     const errors = await CreateSpecialStudentForm.validate(form);
     if (errors) {
@@ -101,7 +101,6 @@ export class StudentsController {
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
     type: StudentDto,
-    isArray: true,
   })
   public async findActiveWithId(@Param('id') id: string) {
     const model = await this.studentsService.findActiveWithId(id);
@@ -110,7 +109,7 @@ export class StudentsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update student with id' })
+  @ApiOperation({ summary: 'Update student profile with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
@@ -120,7 +119,7 @@ export class StudentsController {
   @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUserProfiles)
   @RequiredRoles(UserRoleTypesEnum.Student)
   @RequiredPermissions(UserRolePermissionsEnum.ManageMyProfile)
-  public async updateWithId(
+  public async updateProfileWithId(
     @Param('id') id: string,
     @Body() body: UpdateStudentForm,
     @CurrentUser() currentUser: PayloadAccessDto,
@@ -135,7 +134,7 @@ export class StudentsController {
       });
     }
 
-    const model = await this.studentsService.updateWithId(
+    const model = await this.studentsService.updateProfileWithId(
       id,
       form,
       currentUser,

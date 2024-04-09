@@ -222,7 +222,7 @@ export class UsersService {
 
     const newAvatarPath = await this.filesService.tempReplaceFile(
       avatar,
-      `${FileTypesEnum.Avatar}/${user.avatar}`,
+      user.avatar && `${FileTypesEnum.Avatar}/${user.avatar}`,
     );
 
     return (await this.prisma.user.update({
@@ -254,18 +254,16 @@ export class UsersService {
   }
 
   public async archiveWithId(id: string) {
-    try {
-      return (await this.prisma.user.update({
-        where: { id: id },
-        data: { status: BaseStatusesEnum.Archived },
-        include: { UserRole: true },
-      })) as IUserModel;
-    } catch {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: ErrorCodesEnum.NotFound + `user with id ${id}`,
-      });
-    }
+    const user = await this.findActiveUser({ id: id });
+    await this.filesService.tempDeleteFile(
+      user.avatar && `${FileTypesEnum.Avatar}/${user.avatar}`,
+    );
+
+    return (await this.prisma.user.update({
+      where: { id: id },
+      data: { status: BaseStatusesEnum.Archived, avatar: null },
+      include: { UserRole: true },
+    })) as IUserModel;
   }
 
   // ===== shared methods =====
@@ -296,7 +294,10 @@ export class UsersService {
       throw new BadRequestException({
         statusCode: 404,
         message:
-          ErrorCodesEnum.NotFound + `user ${Object.entries(options).join(' ')}`,
+          ErrorCodesEnum.NotFound +
+          `user with ${Object.entries(options)
+            .map(([key, value]) => `${key} ${value}`)
+            .join(' ')}`,
       });
     }
     if (options?.permissions?.length) {

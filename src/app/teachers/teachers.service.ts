@@ -5,15 +5,16 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { UsersService } from '../users/users.service';
-import { BaseStatusesEnum, UserRoleTypesEnum } from '@prisma/client';
+import { BaseStatusesEnum, Subject, UserRoleTypesEnum } from '@prisma/client';
 import { hash } from 'argon2';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { UserRolesService } from '../user-roles/user-roles.service';
-import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
 import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
 import { TCreateTeacherForms } from './types/create-teacher-forms.type';
 import { ITeacherModel } from './types/teacher-model.interface';
 import { UpdateTeacherForm } from './dtos/update-teacher.form';
+import { difference } from 'lodash';
+import { TeacherQueryDto } from './dtos/teacher-query.dto';
 
 @Injectable()
 export class TeachersService {
@@ -27,11 +28,29 @@ export class TeachersService {
     await this.usersService.doesActiveUserAlreadyExist({ email: form.email });
 
     const role = await this.userRolesService.findRoleWithTitle(form.roleTitle);
-    if (role.type !== UserRoleTypesEnum.Student) {
+    if (role.type !== UserRoleTypesEnum.Teacher) {
       throw new BadRequestException({
         statusCode: 400,
         message: ErrorCodesEnum.InvalidRole + role.title,
       });
+    }
+
+    let subjects: Subject[];
+    if (form.subjects?.length) {
+      subjects = await this.prisma.subject.findMany({
+        where: { title: { in: form.subjects } },
+      });
+      if (subjects.length !== form.subjects.length) {
+        const missingSubjects = difference(
+          form.subjects,
+          subjects.map((subject) => subject.title),
+        );
+        throw new NotFoundException({
+          statusCode: 404,
+          message:
+            ErrorCodesEnum.NotFound + `subjects ${missingSubjects.join(', ')}`,
+        });
+      }
     }
 
     return (await this.prisma.user.create({
@@ -46,16 +65,18 @@ export class TeachersService {
           create: {
             institution: form.institution,
             post: form.post,
+            Subjects: { connect: subjects },
           },
         },
       },
-      include: { Teacher: true, UserRole: true },
-    })) as ITeacherModel;
+      include: { Teacher: { include: { Subjects: true } }, UserRole: true },
+    })) as unknown as ITeacherModel;
   }
 
-  public async findAllActive(query: BaseQueryDto) {
+  public async findAllActive(query: TeacherQueryDto) {
     const take = query.pageSize || 10;
     const skip = ((query.pageNumber || 1) - 1) * take;
+    console.log(query);
 
     const models = (await this.prisma.user.findMany({
       where: {
@@ -65,10 +86,21 @@ export class TeachersService {
           { Teacher: { institution: { contains: query.queryLine } } },
           { Teacher: { post: { contains: query.queryLine } } },
         ],
+        Teacher: query.subjects?.length
+          ? {
+              AND: [
+                // { Subjects: { some: {} } },
+                // { Subjects: { every: { title: { in: query.subjects } } } },
+                ...query.subjects.map((subject) => ({
+                  Subjects: { some: { title: subject } },
+                })),
+              ],
+            }
+          : {},
         status: BaseStatusesEnum.Active,
         UserRole: { type: UserRoleTypesEnum.Teacher },
       },
-      include: { Teacher: true, UserRole: true },
+      include: { Teacher: { include: { Subjects: true } }, UserRole: true },
       take: take,
       skip: skip,
     })) as ITeacherModel[];
@@ -81,6 +113,17 @@ export class TeachersService {
           { Teacher: { institution: { contains: query.queryLine } } },
           { Teacher: { post: { contains: query.queryLine } } },
         ],
+        Teacher: query.subjects?.length
+          ? {
+              AND: [
+                // { Subjects: { some: {} } },
+                // { Subjects: { every: { title: { in: query.subjects } } } },
+                ...query.subjects.map((subject) => ({
+                  Subjects: { some: { title: subject } },
+                })),
+              ],
+            }
+          : {},
         status: BaseStatusesEnum.Active,
         UserRole: { type: UserRoleTypesEnum.Teacher },
       },
@@ -97,7 +140,7 @@ export class TeachersService {
         status: BaseStatusesEnum.Active,
         UserRole: { type: UserRoleTypesEnum.Teacher },
       },
-      include: { Teacher: true, UserRole: true },
+      include: { Teacher: { include: { Subjects: true } }, UserRole: true },
     })) as ITeacherModel;
 
     if (!model) {
@@ -110,12 +153,30 @@ export class TeachersService {
     return model;
   }
 
-  public async updateWithId(
+  public async updateProfileWithId(
     id: string,
     form: UpdateTeacherForm,
     currentUser: PayloadAccessDto,
   ) {
     this.usersService.isCurrentUser(currentUser, id);
+
+    let newSubjects: Subject[];
+    if (form.subjects?.length) {
+      newSubjects = await this.prisma.subject.findMany({
+        where: { title: { in: form.subjects } },
+      });
+      if (newSubjects.length !== form.subjects.length) {
+        const missingSubjects = difference(
+          form.subjects,
+          newSubjects.map((subject) => subject.title),
+        );
+        throw new NotFoundException({
+          statusCode: 404,
+          message:
+            ErrorCodesEnum.NotFound + `subjects ${missingSubjects.join(', ')}`,
+        });
+      }
+    }
 
     try {
       return (await this.prisma.user.update({
@@ -126,16 +187,18 @@ export class TeachersService {
         },
         data: {
           name: form.name,
+
           Teacher: {
             update: {
               data: {
                 institution: form.institution,
                 post: form.post,
+                Subjects: newSubjects?.length ? { set: newSubjects } : {},
               },
             },
           },
         },
-        include: { Teacher: true, UserRole: true },
+        include: { Teacher: { include: { Subjects: true } }, UserRole: true },
       })) as ITeacherModel;
     } catch {
       throw new NotFoundException({

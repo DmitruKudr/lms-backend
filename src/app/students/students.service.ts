@@ -109,7 +109,7 @@ export class StudentsService {
     return model;
   }
 
-  public async updateWithId(
+  public async updateProfileWithId(
     id: string,
     form: UpdateStudentForm,
     currentUser: PayloadAccessDto,
@@ -125,6 +125,7 @@ export class StudentsService {
         },
         data: {
           name: form.name,
+
           Student: {
             update: {
               data: {
