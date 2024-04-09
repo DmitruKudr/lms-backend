@@ -76,7 +76,6 @@ export class TeachersService {
   public async findAllActive(query: TeacherQueryDto) {
     const take = query.pageSize || 10;
     const skip = ((query.pageNumber || 1) - 1) * take;
-    console.log(query);
 
     const models = (await this.prisma.user.findMany({
       where: {
@@ -146,14 +145,14 @@ export class TeachersService {
     if (!model) {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound + `teacher with id ${id}`,
+        message: ErrorCodesEnum.NotFound + `teacher with id - ${id}`,
       });
     }
 
     return model;
   }
 
-  public async updateProfileWithId(
+  public async updateActiveProfileWithId(
     id: string,
     form: UpdateTeacherForm,
     currentUser: PayloadAccessDto,
@@ -203,7 +202,7 @@ export class TeachersService {
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound + `teacher with id ${id}`,
+        message: ErrorCodesEnum.NotFound + `teacher with id - ${id}`,
       });
     }
   }

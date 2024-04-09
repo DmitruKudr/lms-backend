@@ -109,7 +109,7 @@ export class StudentsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update student profile with id' })
+  @ApiOperation({ summary: 'Update active student profile with id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'HTTPStatus:200:OK',
@@ -119,7 +119,7 @@ export class StudentsController {
   @RequiredAdminPermissions(UserRolePermissionsEnum.ManageUserProfiles)
   @RequiredRoles(UserRoleTypesEnum.Student)
   @RequiredPermissions(UserRolePermissionsEnum.ManageMyProfile)
-  public async updateProfileWithId(
+  public async updateActiveProfileWithId(
     @Param('id') id: string,
     @Body() body: UpdateStudentForm,
     @CurrentUser() currentUser: PayloadAccessDto,
@@ -134,7 +134,7 @@ export class StudentsController {
       });
     }
 
-    const model = await this.studentsService.updateProfileWithId(
+    const model = await this.studentsService.updateActiveProfileWithId(
       id,
       form,
       currentUser,

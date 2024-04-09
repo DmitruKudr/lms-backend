@@ -146,7 +146,7 @@ export class UsersController {
       });
     }
 
-    const model = await this.usersService.changeUsernameWithId(
+    const model = await this.usersService.changeActiveUsernameWithId(
       id,
       form,
       currentUser,
@@ -180,7 +180,7 @@ export class UsersController {
       });
     }
 
-    const model = await this.usersService.changeEmailWithId(
+    const model = await this.usersService.changeActiveEmailWithId(
       id,
       form,
       currentUser,
@@ -214,7 +214,7 @@ export class UsersController {
       });
     }
 
-    const model = await this.usersService.changePasswordWithId(
+    const model = await this.usersService.changeActivePasswordWithId(
       id,
       form,
       currentUser,
@@ -239,7 +239,7 @@ export class UsersController {
     @UploadedFile() avatar: Express.Multer.File,
     @CurrentUser() currentUser: PayloadAccessDto,
   ) {
-    const model = await this.usersService.changeAvatarWithId(
+    const model = await this.usersService.changeActiveAvatarWithId(
       id,
       avatar,
       currentUser,

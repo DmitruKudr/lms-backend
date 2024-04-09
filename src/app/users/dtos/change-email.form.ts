@@ -3,15 +3,15 @@ import { IsEmail, validate } from 'class-validator';
 
 export class ChangeEmailForm {
   @ApiProperty({
-    description: 'New user email',
+    description: 'User email',
     format: 'email',
   })
   @IsEmail()
-  newEmail!: string;
+  email!: string;
 
   public static from(form: ChangeEmailForm) {
     const it = new ChangeEmailForm();
-    it.newEmail = form.newEmail;
+    it.email = form.email;
 
     return it;
   }
