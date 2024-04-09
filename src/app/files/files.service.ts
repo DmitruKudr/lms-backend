@@ -53,4 +53,12 @@ export class FilesService {
 
     return newFileName;
   }
+
+  public async tempDeleteFile(filePath: string) {
+    if (filePath) {
+      await fs.promises.unlink(
+        path.resolve(__dirname, '../../..', 'src/temp-files', filePath),
+      );
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { UserRoleTypesEnum } from '@prisma/client';
+import { UserRole } from '@prisma/client';
 import { IStatusModel } from '../../../shared/types/status-model.interface';
 
 export interface IUserModel extends IStatusModel {
@@ -10,8 +10,5 @@ export interface IUserModel extends IStatusModel {
   recoveryLink: string;
   roleId: string;
 
-  UserRole: {
-    title: string;
-    type: UserRoleTypesEnum;
-  };
+  UserRole: UserRole;
 }

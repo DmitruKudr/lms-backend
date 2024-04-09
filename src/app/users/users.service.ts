@@ -45,7 +45,7 @@ export class UsersService {
       });
     }
 
-    const newModel = await this.prisma.user.create({
+    return (await this.prisma.user.create({
       data: {
         name: form.name,
         username: await this.generateUsername(form.name),
@@ -54,53 +54,48 @@ export class UsersService {
         roleId: role.id,
         [role.type]: { create: {} },
       },
-    });
-
-    return {
-      ...newModel,
-      UserRole: {
-        title: role.title,
-        type: role.type,
-      },
-    } as IUserModel;
+      include: { UserRole: true },
+    })) as IUserModel;
   }
 
   public async findActiveUsers(query: UserQueryDto) {
     const take = query.pageSize || 10;
     const skip = ((query.pageNumber || 1) - 1) * take;
 
+    console.log(query);
+
     const models = (await this.prisma.user.findMany({
       where: {
-        AND: [
-          {
-            OR: [
-              { name: { contains: query.queryLine } },
-              { username: { contains: query.queryLine } },
-            ],
-          },
-          { status: BaseStatusesEnum.Active },
-          query.roleType ? { UserRole: { type: query.roleType } } : {},
-          { UserRole: { type: { not: UserRoleTypesEnum.Admin } } },
+        OR: [
+          { name: { contains: query.queryLine } },
+          { username: { contains: query.queryLine } },
         ],
+        status: BaseStatusesEnum.Active,
+        UserRole: {
+          AND: [
+            query.roleType ? { type: query.roleType } : {},
+            { type: { not: UserRoleTypesEnum.Admin } },
+          ],
+        },
       },
-      include: { UserRole: { select: { title: true, type: true } } },
+      include: { UserRole: true },
       take: take,
       skip: skip,
     })) as IUserModel[];
 
     let remaining = await this.prisma.user.count({
       where: {
-        AND: [
-          {
-            OR: [
-              { name: { contains: query.queryLine } },
-              { username: { contains: query.queryLine } },
-            ],
-          },
-          { status: BaseStatusesEnum.Active },
-          query.roleType ? { UserRole: { type: query.roleType } } : {},
-          { UserRole: { type: { not: UserRoleTypesEnum.Admin } } },
+        OR: [
+          { name: { contains: query.queryLine } },
+          { username: { contains: query.queryLine } },
         ],
+        status: BaseStatusesEnum.Active,
+        UserRole: {
+          AND: [
+            query.roleType ? { type: query.roleType } : {},
+            { type: { not: UserRoleTypesEnum.Admin } },
+          ],
+        },
       },
     });
     remaining -= take + skip;
@@ -114,34 +109,26 @@ export class UsersService {
 
     const models = (await this.prisma.user.findMany({
       where: {
-        AND: [
-          {
-            OR: [
-              { name: { contains: query.queryLine } },
-              { username: { contains: query.queryLine } },
-              { email: { contains: query.queryLine } },
-            ],
-          },
-          { UserRole: { type: UserRoleTypesEnum.Admin } },
+        OR: [
+          { name: { contains: query.queryLine } },
+          { username: { contains: query.queryLine } },
+          { email: { contains: query.queryLine } },
         ],
+        UserRole: { type: UserRoleTypesEnum.Admin },
       },
-      include: { UserRole: { select: { title: true, type: true } } },
+      include: { UserRole: true },
       take: take,
       skip: skip,
     })) as IUserModel[];
 
     let remaining = await this.prisma.user.count({
       where: {
-        AND: [
-          {
-            OR: [
-              { name: { contains: query.queryLine } },
-              { username: { contains: query.queryLine } },
-              { email: { contains: query.queryLine } },
-            ],
-          },
-          { UserRole: { type: UserRoleTypesEnum.Admin } },
+        OR: [
+          { name: { contains: query.queryLine } },
+          { username: { contains: query.queryLine } },
+          { email: { contains: query.queryLine } },
         ],
+        UserRole: { type: UserRoleTypesEnum.Admin },
       },
     });
     remaining -= take + skip;
@@ -165,7 +152,7 @@ export class UsersService {
         data: {
           email: form.newUsername,
         },
-        include: { UserRole: { select: { title: true, type: true } } },
+        include: { UserRole: true },
       })) as IUserModel;
     } catch {
       throw new NotFoundException({
@@ -191,7 +178,7 @@ export class UsersService {
         data: {
           email: form.newEmail,
         },
-        include: { UserRole: { select: { title: true, type: true } } },
+        include: { UserRole: true },
       })) as IUserModel;
     } catch {
       throw new NotFoundException({
@@ -221,7 +208,7 @@ export class UsersService {
       data: {
         password: await hash(form.newPassword),
       },
-      include: { UserRole: { select: { title: true, type: true } } },
+      include: { UserRole: true },
     })) as IUserModel;
   }
 
@@ -235,7 +222,7 @@ export class UsersService {
 
     const newAvatarPath = await this.filesService.tempReplaceFile(
       avatar,
-      `${FileTypesEnum.Avatar}/${user.avatar}`,
+      user.avatar && `${FileTypesEnum.Avatar}/${user.avatar}`,
     );
 
     return (await this.prisma.user.update({
@@ -243,7 +230,7 @@ export class UsersService {
       data: {
         avatar: newAvatarPath,
       },
-      include: { UserRole: { select: { title: true, type: true } } },
+      include: { UserRole: true },
     })) as IUserModel;
   }
 
@@ -256,7 +243,7 @@ export class UsersService {
           name: 'Activated User',
           username: await this.generateUsername('Activated User'),
         },
-        include: { UserRole: { select: { title: true, type: true } } },
+        include: { UserRole: true },
       })) as IUserModel;
     } catch {
       throw new NotFoundException({
@@ -267,18 +254,16 @@ export class UsersService {
   }
 
   public async archiveWithId(id: string) {
-    try {
-      return (await this.prisma.user.update({
-        where: { id: id },
-        data: { status: BaseStatusesEnum.Archived },
-        include: { UserRole: { select: { title: true, type: true } } },
-      })) as IUserModel;
-    } catch {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: ErrorCodesEnum.NotFound + `user with id ${id}`,
-      });
-    }
+    const user = await this.findActiveUser({ id: id });
+    await this.filesService.tempDeleteFile(
+      user.avatar && `${FileTypesEnum.Avatar}/${user.avatar}`,
+    );
+
+    return (await this.prisma.user.update({
+      where: { id: id },
+      data: { status: BaseStatusesEnum.Archived, avatar: null },
+      include: { UserRole: true },
+    })) as IUserModel;
   }
 
   // ===== shared methods =====
@@ -293,22 +278,26 @@ export class UsersService {
   ) {
     const user = await this.prisma.user.findFirst({
       where: {
-        AND: [
-          { OR: [{ id: options.id }, { email: options.email }] },
-          options.roleType ? { UserRole: { type: options.roleType } } : {},
-          { status: BaseStatusesEnum.Active },
-        ],
+        OR: [{ id: options.id }, { email: options.email }],
+        status: BaseStatusesEnum.Active,
+        UserRole: {
+          AND: [
+            options.roleType ? { type: options.roleType } : {},
+            { type: { not: UserRoleTypesEnum.Admin } },
+          ],
+        },
       },
-      include: {
-        UserRole: { select: { title: true, type: true, permissions: true } },
-      },
+      include: { UserRole: true },
     });
 
     if (!user) {
       throw new BadRequestException({
         statusCode: 404,
         message:
-          ErrorCodesEnum.NotFound + `user ${Object.entries(options).join(' ')}`,
+          ErrorCodesEnum.NotFound +
+          `user with ${Object.entries(options)
+            .map(([key, value]) => `${key} ${value}`)
+            .join(' ')}`,
       });
     }
     if (options?.permissions?.length) {
@@ -343,7 +332,7 @@ export class UsersService {
         OR: [{ email: options.email }, { username: options.username }],
         status: BaseStatusesEnum.Active,
       },
-      include: { UserRole: { select: { title: true, type: true } } },
+      include: { UserRole: true },
     })) as IUserModel;
     if (user) {
       throw new BadRequestException({
