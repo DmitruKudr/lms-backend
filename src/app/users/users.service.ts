@@ -136,59 +136,59 @@ export class UsersService {
     return remaining > 0 ? { models, remaining } : { models, remaining: 0 };
   }
 
-  public async changeUsernameWithId(
+  public async changeActiveUsernameWithId(
     id: string,
     form: ChangeUsernameForm,
     currentUser: PayloadAccessDto,
   ) {
     this.isCurrentUser(currentUser, id);
     await this.doesActiveUserAlreadyExist({
-      username: form.newUsername,
+      username: form.username,
     });
 
     try {
       return (await this.prisma.user.update({
         where: { id: id, status: BaseStatusesEnum.Active },
         data: {
-          email: form.newUsername,
+          email: form.username,
         },
         include: { UserRole: true },
       })) as IUserModel;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound + `user with id ${id}`,
+        message: ErrorCodesEnum.NotFound + `user with id - ${id}`,
       });
     }
   }
 
-  public async changeEmailWithId(
+  public async changeActiveEmailWithId(
     id: string,
     form: ChangeEmailForm,
     currentUser: PayloadAccessDto,
   ) {
     this.isCurrentUser(currentUser, id);
     await this.doesActiveUserAlreadyExist({
-      email: form.newEmail,
+      email: form.email,
     });
 
     try {
       return (await this.prisma.user.update({
         where: { id: id, status: BaseStatusesEnum.Active },
         data: {
-          email: form.newEmail,
+          email: form.email,
         },
         include: { UserRole: true },
       })) as IUserModel;
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound + `user with id ${id}`,
+        message: ErrorCodesEnum.NotFound + `user with id - ${id}`,
       });
     }
   }
 
-  public async changePasswordWithId(
+  public async changeActivePasswordWithId(
     id: string,
     form: ChangePasswordForm,
     currentUser: PayloadAccessDto,
@@ -212,7 +212,7 @@ export class UsersService {
     })) as IUserModel;
   }
 
-  public async changeAvatarWithId(
+  public async changeActiveAvatarWithId(
     id: string,
     avatar: IFileValue,
     currentUser: PayloadAccessDto,
@@ -248,7 +248,7 @@ export class UsersService {
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound + `user with id ${id}`,
+        message: ErrorCodesEnum.NotFound + `user with id - ${id}`,
       });
     }
   }
@@ -261,7 +261,12 @@ export class UsersService {
 
     return (await this.prisma.user.update({
       where: { id: id },
-      data: { status: BaseStatusesEnum.Archived, avatar: null },
+      data: {
+        status: BaseStatusesEnum.Archived,
+        email: null,
+        username: await this.generateUsername('Archived User'),
+        avatar: null,
+      },
       include: { UserRole: true },
     })) as IUserModel;
   }
@@ -296,7 +301,7 @@ export class UsersService {
         message:
           ErrorCodesEnum.NotFound +
           `user with ${Object.entries(options)
-            .map(([key, value]) => `${key} ${value}`)
+            .map(([key, value]) => `${key} - ${value}`)
             .join(' ')}`,
       });
     }
@@ -310,9 +315,9 @@ export class UsersService {
           statusConde: 403,
           message: `${
             ErrorCodesEnum.NotEnoughPermissions
-          }${lackingPermissions.join(', ')} for ${user.UserRole.type} with id ${
-            user.id
-          }`,
+          }${lackingPermissions.join(', ')} for ${
+            user.UserRole.type
+          } with id - ${user.id}`,
         });
       }
     }

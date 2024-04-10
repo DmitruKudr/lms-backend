@@ -1,7 +1,7 @@
 import { TeacherToStudentStatusesEnum } from '@prisma/client';
 import { IStudentModel } from '../../students/types/student-model.interface';
-import { IUserModel } from '../../users/types/user-model.interface';
 import { IBaseModel } from '../../../shared/types/base-model.interface';
+import { ITeacherModel } from '../../teachers/types/teacher-model.interface';
 
 export interface ITeacherToStudentModel extends IBaseModel {
   teacherId: string;
@@ -11,12 +11,3 @@ export interface ITeacherToStudentModel extends IBaseModel {
   Teacher?: { User: ITeacherModel };
   Student?: { User: IStudentModel };
 }
-
-// ===== TODO remove next =====
-interface ITeacherModel extends IUserModel {
-  Teacher: {
-    institution: string;
-    post: string;
-  };
-}
-// ===== before here =====

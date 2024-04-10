@@ -10,7 +10,7 @@ import {
 
 export class ChangeUsernameForm {
   @ApiProperty({
-    description: 'New user username',
+    description: 'User username',
     minLength: 6,
     maxLength: 40,
     example: 'johndoejunior',
@@ -21,11 +21,11 @@ export class ChangeUsernameForm {
   @NotContains(' ', { message: 'username must not contain spaces' })
   @Length(6, 40, { message: 'name must be 6-40 characters long' })
   @IsOptional()
-  newUsername?: string;
+  username?: string;
 
   public static from(form: ChangeUsernameForm) {
     const it = new ChangeUsernameForm();
-    it.newUsername = form.newUsername;
+    it.username = form.username;
 
     return it;
   }

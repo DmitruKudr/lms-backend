@@ -86,7 +86,7 @@ export class CreateSpecialTeacherForm {
   post?: string;
 
   @ApiProperty({
-    description: 'Teacher subjects to teach',
+    description: 'Teacher subject titles to teach (in lowercase!)',
     isArray: true,
     minItems: 1,
     uniqueItems: true,

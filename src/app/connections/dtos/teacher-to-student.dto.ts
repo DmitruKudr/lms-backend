@@ -3,34 +3,7 @@ import { TeacherToStudent, TeacherToStudentStatusesEnum } from '@prisma/client';
 import { BaseModelDto } from '../../../shared/dtos/base-model.dto';
 import { ITeacherToStudentModel } from '../types/teacher-to-student-model.interface';
 import { StudentDto } from '../../students/dtos/student.dto';
-import { UserDto } from '../../users/dtos/user.dto';
-import { IUserModel } from '../../users/types/user-model.interface';
-
-// ===== TODO remove next =====
-class TeacherDto extends UserDto {
-  institution?: string;
-  post?: string;
-
-  public static fromModel(model: ITeacherModel, password?: string) {
-    const it = super.fromModel(model, password) as TeacherDto;
-    it.institution = model.Teacher.institution;
-    it.post = model.Teacher.post;
-
-    return it;
-  }
-
-  public static fromModels(models: ITeacherModel[]) {
-    return !models?.map ? [] : models.map((model) => this.fromModel(model));
-  }
-}
-
-interface ITeacherModel extends IUserModel {
-  Teacher: {
-    institution: string;
-    post: string;
-  };
-}
-// ===== before here =====
+import { TeacherDto } from '../../teachers/dtos/teacher.dto';
 
 export class TeacherToStudentDto extends BaseModelDto {
   @ApiProperty({

@@ -102,14 +102,14 @@ export class StudentsService {
     if (!model) {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound + `student with id ${id}`,
+        message: ErrorCodesEnum.NotFound + `student with id - ${id}`,
       });
     }
 
     return model;
   }
 
-  public async updateProfileWithId(
+  public async updateActiveProfileWithId(
     id: string,
     form: UpdateStudentForm,
     currentUser: PayloadAccessDto,
@@ -140,7 +140,7 @@ export class StudentsService {
     } catch {
       throw new NotFoundException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound + `student with id ${id}`,
+        message: ErrorCodesEnum.NotFound + `student with id - ${id}`,
       });
     }
   }

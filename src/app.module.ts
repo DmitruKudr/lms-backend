@@ -6,6 +6,7 @@ import { UsersModule } from './app/users/users.module';
 import { StudentsModule } from './app/students/students.module';
 import { ConnectionsModule } from './app/connections/connections.module';
 import { TeachersModule } from './app/teachers/teachers.module';
+import { SubjectsModule } from './app/subjects/subjects.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { TeachersModule } from './app/teachers/teachers.module';
     ConnectionsModule,
     StudentsModule,
     TeachersModule,
+    SubjectsModule,
   ],
   controllers: [],
   providers: [],
