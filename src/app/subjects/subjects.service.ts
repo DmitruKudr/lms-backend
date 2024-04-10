@@ -9,6 +9,7 @@ import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { BaseQueryDto } from '../../shared/dtos/base-query.dto';
 import { BaseStatusesEnum } from '@prisma/client';
 import { UpdateSubjectForm } from './dtos/update-subject.form';
+import { difference } from 'lodash';
 
 @Injectable()
 export class SubjectsService {
@@ -62,15 +63,22 @@ export class SubjectsService {
   public async updateWithId(id: string, form: UpdateSubjectForm) {
     await this.doesActiveSubjectAlreadyExist(form.title);
 
-    return this.prisma.subject.update({
-      where: { id: id },
-      data: { title: form.title },
-    });
+    try {
+      return await this.prisma.subject.update({
+        where: { id: id },
+        data: { title: form.title },
+      });
+    } catch {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: ErrorCodesEnum.NotFound + `subject with id - ${id}`,
+      });
+    }
   }
 
   public async activateWithId(id: string) {
     try {
-      return this.prisma.subject.update({
+      return await this.prisma.subject.update({
         where: { id: id },
         data: { status: BaseStatusesEnum.Active },
       });
@@ -84,7 +92,7 @@ export class SubjectsService {
 
   public async archiveWithId(id: string) {
     try {
-      return this.prisma.subject.update({
+      return await this.prisma.subject.update({
         where: { id: id },
         data: { status: BaseStatusesEnum.Archived },
       });
@@ -110,5 +118,29 @@ export class SubjectsService {
     }
 
     return subject;
+  }
+
+  public async findManyActiveWithTitleList(titleList: string[]) {
+    if (!titleList) {
+      return undefined;
+    }
+
+    const models = await this.prisma.subject.findMany({
+      where: { title: { in: titleList }, status: BaseStatusesEnum.Active },
+    });
+
+    if (models.length !== titleList.length) {
+      const missingSubjects = difference(
+        titleList,
+        models.map((model) => model.title),
+      );
+      throw new NotFoundException({
+        statusCode: 404,
+        message:
+          ErrorCodesEnum.NotFound + `subjects - ${missingSubjects.join(', ')}`,
+      });
+    }
+
+    return models;
   }
 }

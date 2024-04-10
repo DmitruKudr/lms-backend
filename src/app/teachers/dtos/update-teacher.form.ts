@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  ArrayMinSize,
   ArrayUnique,
   IsArray,
   IsLowercase,
@@ -56,12 +55,10 @@ export class UpdateTeacherForm {
   @ApiProperty({
     description: 'Teacher subjects to teach',
     isArray: true,
-    minItems: 1,
     uniqueItems: true,
     example: ['math', 'physics'],
   })
   @IsArray()
-  @ArrayMinSize(1)
   @IsString({ each: true })
   @IsLowercase({ each: true })
   @ArrayUnique()

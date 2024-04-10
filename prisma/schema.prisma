@@ -65,6 +65,7 @@ enum UserRolePermissionsEnum {
   ManageTests
   ManageTodos
   ManageGroups
+  ManageSubjects
   ManageComments
   FindAllUsers
   FindAllTests

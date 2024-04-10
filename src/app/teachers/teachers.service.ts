@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { UsersService } from '../users/users.service';
-import { BaseStatusesEnum, Subject, UserRoleTypesEnum } from '@prisma/client';
+import { BaseStatusesEnum, UserRoleTypesEnum } from '@prisma/client';
 import { hash } from 'argon2';
 import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { UserRolesService } from '../user-roles/user-roles.service';
@@ -13,8 +13,8 @@ import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
 import { TCreateTeacherForms } from './types/create-teacher-forms.type';
 import { ITeacherModel } from './types/teacher-model.interface';
 import { UpdateTeacherForm } from './dtos/update-teacher.form';
-import { difference } from 'lodash';
 import { TeacherQueryDto } from './dtos/teacher-query.dto';
+import { SubjectsService } from '../subjects/subjects.service';
 
 @Injectable()
 export class TeachersService {
@@ -22,6 +22,7 @@ export class TeachersService {
     private prisma: PrismaService,
     private usersService: UsersService,
     private userRolesService: UserRolesService,
+    private subjectsService: SubjectsService,
   ) {}
 
   public async create(form: TCreateTeacherForms) {
@@ -35,23 +36,9 @@ export class TeachersService {
       });
     }
 
-    let subjects: Subject[];
-    if (form.subjects?.length) {
-      subjects = await this.prisma.subject.findMany({
-        where: { title: { in: form.subjects } },
-      });
-      if (subjects.length !== form.subjects.length) {
-        const missingSubjects = difference(
-          form.subjects,
-          subjects.map((subject) => subject.title),
-        );
-        throw new NotFoundException({
-          statusCode: 404,
-          message:
-            ErrorCodesEnum.NotFound + `subjects ${missingSubjects.join(', ')}`,
-        });
-      }
-    }
+    const subjects = await this.subjectsService.findManyActiveWithTitleList(
+      form.subjects,
+    );
 
     return (await this.prisma.user.create({
       data: {
@@ -159,23 +146,9 @@ export class TeachersService {
   ) {
     this.usersService.isCurrentUser(currentUser, id);
 
-    let newSubjects: Subject[];
-    if (form.subjects?.length) {
-      newSubjects = await this.prisma.subject.findMany({
-        where: { title: { in: form.subjects } },
-      });
-      if (newSubjects.length !== form.subjects.length) {
-        const missingSubjects = difference(
-          form.subjects,
-          newSubjects.map((subject) => subject.title),
-        );
-        throw new NotFoundException({
-          statusCode: 404,
-          message:
-            ErrorCodesEnum.NotFound + `subjects ${missingSubjects.join(', ')}`,
-        });
-      }
-    }
+    const newSubjects = await this.subjectsService.findManyActiveWithTitleList(
+      form.subjects,
+    );
 
     try {
       return (await this.prisma.user.update({
@@ -192,7 +165,9 @@ export class TeachersService {
               data: {
                 institution: form.institution,
                 post: form.post,
-                Subjects: newSubjects?.length ? { set: newSubjects } : {},
+                Subjects: Array.isArray(newSubjects)
+                  ? { set: newSubjects }
+                  : {},
               },
             },
           },
