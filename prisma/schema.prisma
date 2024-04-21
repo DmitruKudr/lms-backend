@@ -229,19 +229,20 @@ model Test {
   status    BaseStatusesEnum @default(Active)
 
   title          String
+  file           String?
   language       String?
   testDuration   Int?    @map("test_duration")
   textSelectable Boolean @default(false)
 
   access     TestAccessesEnum    @default(Hidden)
   pageFormat TestPageFormatsEnum @default(SinglePage) @map("page_format")
-  resultType TestResultsEnum     @default(Percents) @map("result_type")
+  resultType TestResultTypesEnum @default(Percents) @map("result_type")
   testStatus TestStatusesEnum    @default(InCreation) @map("test_status")
 
-  Subject   Subject @relation(fields: [subjectId], references: [id])
-  subjectId String  @map("subject_id")
-  Creator   Teacher @relation(fields: [creatorId], references: [id])
-  creatorId String  @map("creator_id")
+  Subject   Subject? @relation(fields: [subjectId], references: [id])
+  subjectId String?  @map("subject_id")
+  Teacher   Teacher? @relation(fields: [teacherId], references: [id])
+  teacherId String?  @map("creator_id")
 
   TestItems TestItem[]
   Todos     Todo[]
@@ -265,7 +266,7 @@ enum TestPageFormatsEnum {
   @@map("test_page_formats_enum")
 }
 
-enum TestResultsEnum {
+enum TestResultTypesEnum {
   Percents
   Points
   OneMistake
@@ -288,12 +289,12 @@ model TestItem {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  title    String
+  text     String?
   question String?
   media    String?
   points   Int?
 
-  mediaType  TestItemMediaTypesEnum   @default(NoMedia) @map("media_type")
+  mediaType  TestItemMediaTypesEnum?  @map("media_type")
   answerType TestItemAnswerTypesEnum  @default(Text) @map("answer_type")
   optionType TestItemOptionTypesEnum? @map("option_type")
 
@@ -308,7 +309,6 @@ model TestItem {
 }
 
 enum TestItemMediaTypesEnum {
-  NoMedia
   Image
   Audio
   PDF
@@ -383,7 +383,7 @@ model Todo {
   Test      Test     @relation(fields: [testId], references: [id])
   testId    String   @map("test_id")
   Teacher   Teacher? @relation(fields: [teacherId], references: [id])
-  teacherId String?
+  teacherId String?  @map("teacher_id")
 
   TodoItems TodoItem[]
 

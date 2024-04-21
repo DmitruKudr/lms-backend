@@ -30,16 +30,16 @@ export class UserDto extends StatusModelDto {
   password?: string;
 
   @ApiProperty({
-    description: 'User role id',
-    format: 'uuid',
-  })
-  roleId!: string;
-
-  @ApiProperty({
     description: 'User avatar',
     example: 'avatar.png',
   })
   avatar!: string;
+
+  @ApiProperty({
+    description: 'User role id',
+    format: 'uuid',
+  })
+  roleId!: string;
 
   @ApiProperty({
     description: 'User role title',
@@ -51,7 +51,7 @@ export class UserDto extends StatusModelDto {
     description: 'User role type',
     enum: UserRoleTypesEnum,
   })
-  roleType?: UserRoleTypesEnum;
+  roleType!: UserRoleTypesEnum;
 
   public static fromModel(model: IUserModel, password?: string) {
     const it = super.fromModel(model) as UserDto;

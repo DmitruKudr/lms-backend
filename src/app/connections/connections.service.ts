@@ -59,7 +59,9 @@ export class ConnectionsService {
             select: {
               User: {
                 include: {
-                  Teacher: { select: { institution: true, post: true } },
+                  Teacher: {
+                    select: { institution: true, post: true, Subjects: true },
+                  },
                   UserRole: { select: { title: true, type: true } },
                 },
               },
@@ -93,7 +95,9 @@ export class ConnectionsService {
           select: {
             User: {
               include: {
-                Teacher: { select: { institution: true, post: true } },
+                Teacher: {
+                  select: { institution: true, post: true, Subjects: true },
+                },
                 UserRole: { select: { title: true, type: true } },
               },
             },
@@ -128,7 +132,9 @@ export class ConnectionsService {
           select: {
             User: {
               include: {
-                Teacher: { select: { institution: true, post: true } },
+                Teacher: {
+                  select: { institution: true, post: true, Subjects: true },
+                },
                 UserRole: { select: { title: true, type: true } },
               },
             },
@@ -169,7 +175,9 @@ export class ConnectionsService {
           select: {
             User: {
               include: {
-                Teacher: { select: { institution: true, post: true } },
+                Teacher: {
+                  select: { institution: true, post: true, Subjects: true },
+                },
                 UserRole: { select: { title: true, type: true } },
               },
             },
@@ -215,7 +223,9 @@ export class ConnectionsService {
               select: {
                 User: {
                   include: {
-                    Teacher: { select: { institution: true, post: true } },
+                    Teacher: {
+                      select: { institution: true, post: true, Subjects: true },
+                    },
                     UserRole: { select: { title: true, type: true } },
                   },
                 },
@@ -273,7 +283,9 @@ export class ConnectionsService {
               select: {
                 User: {
                   include: {
-                    Teacher: { select: { institution: true, post: true } },
+                    Teacher: {
+                      select: { institution: true, post: true, Subjects: true },
+                    },
                     UserRole: { select: { title: true, type: true } },
                   },
                 },
@@ -309,7 +321,9 @@ export class ConnectionsService {
               select: {
                 User: {
                   include: {
-                    Teacher: { select: { institution: true, post: true } },
+                    Teacher: {
+                      select: { institution: true, post: true, Subjects: true },
+                    },
                     UserRole: { select: { title: true, type: true } },
                   },
                 },
@@ -361,7 +375,9 @@ export class ConnectionsService {
               select: {
                 User: {
                   include: {
-                    Teacher: { select: { institution: true, post: true } },
+                    Teacher: {
+                      select: { institution: true, post: true, Subjects: true },
+                    },
                     UserRole: { select: { title: true, type: true } },
                   },
                 },

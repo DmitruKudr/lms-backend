@@ -24,12 +24,22 @@ export enum ErrorCodesEnum {
   InvalidRole = 'errors.invalid-form.user-role-must-be: ',
   NotIdParameter = 'errors.parameter.parameter-must-be-in-id-format: ',
   InvalidOldPassword = 'errors.invalid-form.old-password-is-invalid: ',
+  InvalidJSON = 'errors.invalid-form.invalid-json: ',
 
   // ===== file validation =====
-  InvalidFileSize = 'errors.invalid-form.file-size-must-be-less-than: ',
-  InvalidFileType = 'errors.invalid-form.file-type-must-be: ',
-  UnknownFileType = 'errors.invalid-form.unknown-file-type',
+  // InvalidFileSize = 'errors.invalid-form.file-size-must-be-less-than: ',
+  InvalidFileSize = 'errors.invalid-form.invalid-file-size: ',
+  InvalidFileFormat = 'errors.invalid-form.invalid-file-format: ',
+  UnknownFileFormat = 'errors.invalid-form.unknown-file-format: ',
+  FileIsNotProvided = 'errors.invalid-form.file-is-not-provided: ',
+  SameFileFormat = 'errors.invalid-form.all-files-must-be-same-format: ',
 
   // ===== connections =====
   ConnectionAlreadyExists = 'errors.invalid-form.connection-already-exists: ',
+
+  // ===== tests =====
+  InvalidTestItemAnswer = 'errors.invalid-form.invalid-test-item-answer: ',
+  TestItemOptionsAreNotProvided = 'errors.invalid-form.test-item-options-are-not-provided: ',
+  TestItemOptionFilesAreNotProvided = 'errors.invalid-form.test-item-option-files-are-not-provided: ',
+  UnknownTestItemOptionType = 'errors.invalid-form.unknown-test-item-option-type: ',
 }

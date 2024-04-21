@@ -1,4 +1,6 @@
 export enum FileTypesEnum {
   Avatar = 'avatar',
-  TestImage = 'testImage',
+  TestFile = 'testFile',
+  TestItemFiles = 'testItemFiles',
+  TestItemOptionFiles = 'testItemOptionFiles',
 }
