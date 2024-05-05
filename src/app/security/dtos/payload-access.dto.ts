@@ -1,4 +1,8 @@
-import { UserRole, UserRolePermissionsEnum } from '@prisma/client';
+import {
+  UserRole,
+  UserRolePermissionsEnum,
+  UserRoleTypesEnum,
+} from '@prisma/client';
 import { IUserModel } from '../../users/types/user-model.interface';
 
 export class PayloadAccessDto {
@@ -6,8 +10,9 @@ export class PayloadAccessDto {
   username: string;
   email: string;
   roleId: string;
-  roleType: string;
+  roleType: UserRoleTypesEnum;
   permissions: UserRolePermissionsEnum[];
+
   public static fromModel(userModel: IUserModel, roleModel: UserRole) {
     const it = new PayloadAccessDto();
     it.id = userModel.id;

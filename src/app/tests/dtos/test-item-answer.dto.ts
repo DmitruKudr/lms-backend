@@ -8,6 +8,7 @@ export class TestItemAnswerDto extends BaseModelDto {
     example: 'Yellow',
   })
   text: string;
+
   public static fromModel(model: TestItemAnswer) {
     const it = super.fromModel(model) as TestItemAnswerDto;
     it.text = model.text;

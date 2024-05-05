@@ -28,6 +28,7 @@ export enum ErrorCodesEnum {
 
   // ===== file validation =====
   // InvalidFileSize = 'errors.invalid-form.file-size-must-be-less-than: ',
+  InvalidNumberOfFiles = 'errors.invalid-form.invalid-number-of-files: ',
   InvalidFileSize = 'errors.invalid-form.invalid-file-size: ',
   InvalidFileFormat = 'errors.invalid-form.invalid-file-format: ',
   UnknownFileFormat = 'errors.invalid-form.unknown-file-format: ',

@@ -68,14 +68,10 @@ enum UserRolePermissionsEnum {
   ManageSubjects
   ManageComments
   FindAllUsers
-  FindAllTests
-  FindAllTodos
-  FindAllGroups
-  FindAllComments
   // ===== user permissions =====
   CreateMyTests
   CreateMyGroups
-  CreateTodosForMyself
+  CreateMyTodos
   CreateCommentsForMyStudents
   ManageMyProfile
   ManageMyTests

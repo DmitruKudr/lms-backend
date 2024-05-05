@@ -3,7 +3,6 @@ import {
   Injectable,
   ExecutionContext,
   ForbiddenException,
-  UnauthorizedException,
   CanActivate,
 } from '@nestjs/common';
 import { UserRolePermissionsEnum, UserRoleTypesEnum } from '@prisma/client';

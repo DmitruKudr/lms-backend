@@ -5,14 +5,20 @@ import { FileTypesEnum } from '../../shared/enums/file-types.enum';
 import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
 import { UsersService } from '../users/users.service';
 import { SubjectsService } from '../subjects/subjects.service';
-import { CreateTestItemForm } from './dtos/create-test-item.form';
 import {
+  BaseStatusesEnum,
+  TestAccessesEnum,
   TestItemAnswerTypesEnum,
   TestItemOptionTypesEnum,
+  TestStatusesEnum,
+  UserRolePermissionsEnum,
   UserRoleTypesEnum,
 } from '@prisma/client';
 import { FilesService } from '../files/files.service';
 import { ITestModel } from './types/test-model.interface';
+import { TestQueryDto } from './dtos/test-query.dto';
+import { intersection } from 'lodash';
+import { TestDto } from './dtos/test.dto';
 
 @Injectable()
 export class TestsService {
@@ -112,17 +118,181 @@ export class TestsService {
           select: {
             User: {
               include: {
-                Teacher: {
-                  select: { institution: true, post: true, Subjects: true },
-                },
-                UserRole: { select: { title: true, type: true } },
+                Teacher: { include: { Subjects: true } },
+                UserRole: true,
               },
             },
           },
         },
       },
-    })) as unknown as ITestModel;
+    })) as ITestModel;
 
     return model;
+  }
+
+  public async findAllActive(
+    query: TestQueryDto,
+    currentUser: PayloadAccessDto,
+  ) {
+    const take = query.pageSize || 10;
+    const skip = ((query.pageNumber || 1) - 1) * take;
+
+    const models = (await this.prisma.test.findMany({
+      where: {
+        title: { contains: query.queryLine },
+        language: { contains: query.language },
+        testDuration: { lte: query.maxDuration || 300 },
+        access: (function () {
+          if (!currentUser) {
+            return TestAccessesEnum.Open;
+          }
+
+          if (
+            intersection(currentUser.permissions, [
+              UserRolePermissionsEnum.All,
+              UserRolePermissionsEnum.ManageTests,
+            ]).length
+          ) {
+            return query.access || {};
+          }
+
+          switch (query.access) {
+            case undefined: {
+              if (currentUser.roleType === UserRoleTypesEnum.Teacher) {
+                return {
+                  in: [TestAccessesEnum.Open, TestAccessesEnum.TeachersOnly],
+                };
+              }
+
+              if (currentUser.roleType === UserRoleTypesEnum.Student) {
+                return {
+                  in: [TestAccessesEnum.Open, TestAccessesEnum.MyStudentsOnly],
+                };
+              }
+
+              return TestAccessesEnum.Open;
+            }
+
+            case TestAccessesEnum.TeachersOnly: {
+              return currentUser.roleType === UserRoleTypesEnum.Teacher
+                ? TestAccessesEnum.TeachersOnly
+                : TestAccessesEnum.Open;
+            }
+
+            case TestAccessesEnum.MyStudentsOnly: {
+              return currentUser.roleType === UserRoleTypesEnum.Student
+                ? TestAccessesEnum.MyStudentsOnly
+                : TestAccessesEnum.Open;
+            }
+
+            default: {
+              return TestAccessesEnum.Open;
+            }
+          }
+        })(),
+        Teacher:
+          query.onlyMyTeachers &&
+          currentUser?.roleType === UserRoleTypesEnum.Student
+            ? { Students: { some: { id: currentUser.id } } }
+            : {},
+        testStatus: query.testStatus || {},
+        Subject: query.subjects?.length
+          ? { OR: query.subjects.map((subject) => ({ title: subject })) }
+          : {},
+        // teacherId: query.teacherId,
+        teacherId: query.teacherIds?.length ? { in: query.teacherIds } : {},
+        status: BaseStatusesEnum.Active,
+      },
+      include: {
+        // TestItems: {
+        //   include: { TestItemAnswers: true, TestItemOptions: true },
+        // },
+        TestItems: true,
+        Subject: true,
+        Teacher: {
+          select: {
+            User: {
+              include: {
+                Teacher: { include: { Subjects: true } },
+                UserRole: true,
+              },
+            },
+          },
+        },
+      },
+      take: take,
+      skip: skip,
+    })) as ITestModel[];
+
+    let remaining = await this.prisma.test.count({
+      where: {
+        title: { contains: query.queryLine },
+        language: { contains: query.language },
+        testDuration: { lte: query.maxDuration || 300 },
+        access: (function () {
+          if (!currentUser) {
+            return TestAccessesEnum.Open;
+          }
+
+          if (
+            intersection(currentUser.permissions, [
+              UserRolePermissionsEnum.All,
+              UserRolePermissionsEnum.ManageTests,
+            ]).length
+          ) {
+            return query.access || {};
+          }
+
+          switch (query.access) {
+            case undefined: {
+              if (currentUser.roleType === UserRoleTypesEnum.Teacher) {
+                return {
+                  in: [TestAccessesEnum.Hidden, TestAccessesEnum.TeachersOnly],
+                };
+              }
+
+              if (currentUser.roleType === UserRoleTypesEnum.Student) {
+                return {
+                  in: [TestAccessesEnum.Open, TestAccessesEnum.MyStudentsOnly],
+                };
+              }
+
+              return TestAccessesEnum.Open;
+            }
+
+            case TestAccessesEnum.TeachersOnly: {
+              return currentUser.roleType === UserRoleTypesEnum.Teacher
+                ? TestAccessesEnum.TeachersOnly
+                : TestAccessesEnum.Open;
+            }
+
+            case TestAccessesEnum.MyStudentsOnly: {
+              return currentUser.roleType === UserRoleTypesEnum.Student
+                ? TestAccessesEnum.MyStudentsOnly
+                : TestAccessesEnum.Open;
+            }
+
+            default: {
+              return TestAccessesEnum.Open;
+            }
+          }
+        })(),
+        Teacher:
+          query.onlyMyTeachers &&
+          currentUser?.roleType === UserRoleTypesEnum.Student
+            ? { Students: { some: { id: currentUser.id } } }
+            : {},
+        testStatus: query.testStatus || {},
+        Subject: query.subjects?.length
+          ? { OR: query.subjects.map((subject) => ({ title: subject })) }
+          : {},
+        // teacherId: query.teacherId,
+        teacherId: query.teacherIds?.length ? { in: query.teacherIds } : {},
+        status: BaseStatusesEnum.Active,
+      },
+    });
+    remaining -= take + skip;
+
+    return remaining > 0 ? { models, remaining } : { models, remaining: 0 };
   }
 }

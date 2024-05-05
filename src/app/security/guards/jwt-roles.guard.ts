@@ -3,19 +3,17 @@ import {
   Injectable,
   ExecutionContext,
   ForbiddenException,
-  UnauthorizedException,
   CanActivate,
 } from '@nestjs/common';
 import { UserRolePermissionsEnum, UserRoleTypesEnum } from '@prisma/client';
 import { PayloadAccessDto } from '../dtos/payload-access.dto';
-import { isEmpty, includes, difference } from 'lodash';
+import { isEmpty, includes } from 'lodash';
 import { ErrorCodesEnum } from '../../../shared/enums/error-codes.enum';
 import { JwtPermissionsGuard } from './jwt-permissions.guard';
 
 @Injectable()
 export class JwtRolesGuard extends JwtPermissionsGuard implements CanActivate {
   protected roles: UserRoleTypesEnum[];
-  protected adminPermissions: UserRolePermissionsEnum[];
 
   constructor(protected reflector: Reflector) {
     super(reflector);

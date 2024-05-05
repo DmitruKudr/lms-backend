@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  TestItemAnswer,
   TestItemAnswerTypesEnum,
   TestItemMediaTypesEnum,
   TestItemOptionTypesEnum,
@@ -59,7 +58,7 @@ export class TestItemDto extends BaseModelDto {
     type: TestItemOptionDto,
     isArray: true,
   })
-  options: TestItemOptionDto[];
+  options?: TestItemOptionDto[];
 
   @ApiProperty({
     description: 'Test-item option type',
@@ -74,11 +73,14 @@ export class TestItemDto extends BaseModelDto {
     it.points = model.points;
     it.media = model.media;
     it.mediaType = model.mediaType;
-    it.answerType = model.answerType;
-    it.optionType = model.optionType;
 
+    it.answerType = model.answerType;
     it.answers = TestItemAnswerDto.fromModels(model.TestItemAnswers);
-    it.options = TestItemOptionDto.fromModels(model.TestItemOptions);
+
+    if (model.optionType) {
+      it.optionType = model.optionType;
+      it.options = TestItemOptionDto.fromModels(model.TestItemOptions);
+    }
 
     return it;
   }

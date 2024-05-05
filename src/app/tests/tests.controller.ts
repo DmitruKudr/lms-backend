@@ -2,8 +2,11 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
+  Query,
+  Req,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -22,6 +25,7 @@ import { ErrorCodesEnum } from '../../shared/enums/error-codes.enum';
 import { CurrentUser } from '../security/decorators/current-user.decorator';
 import { PayloadAccessDto } from '../security/dtos/payload-access.dto';
 import { TestDto } from './dtos/test.dto';
+import { TestQueryDto } from './dtos/test-query.dto';
 
 @ApiTags('tests')
 @Controller('tests')
@@ -41,6 +45,7 @@ export class TestsController {
   @RequiredPermissions(UserRolePermissionsEnum.CreateMyTests)
   @UseInterceptors(
     FileFieldsInterceptor([
+      // TODO check maxCount in FileValidationPipe depending on FileType
       { name: FileTypesEnum.TestFile, maxCount: 1 },
       { name: FileTypesEnum.TestItemFiles, maxCount: 30 },
       { name: FileTypesEnum.TestItemOptionFiles, maxCount: 150 },
@@ -81,5 +86,26 @@ export class TestsController {
     const model = await this.testsService.create(form, currentUser, files);
 
     return TestDto.fromModel(model);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Find all active tests' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'HTTPStatus:200:OK',
+    type: TestDto,
+    isArray: true,
+  })
+  public async findAllActive(
+    @Query() query: TestQueryDto,
+    @CurrentUser() currentUser: PayloadAccessDto,
+    @Req() req: any,
+  ) {
+    const { models, remaining } = await this.testsService.findAllActive(
+      query,
+      currentUser,
+    );
+
+    return { data: TestDto.fromModels(models), remaining };
   }
 }

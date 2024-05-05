@@ -57,7 +57,7 @@ export class TeachersService {
         },
       },
       include: { Teacher: { include: { Subjects: true } }, UserRole: true },
-    })) as unknown as ITeacherModel;
+    })) as ITeacherModel;
   }
 
   public async findAllActive(query: TeacherQueryDto) {

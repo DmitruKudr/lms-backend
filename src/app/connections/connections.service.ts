@@ -46,7 +46,7 @@ export class ConnectionsService {
     });
 
     if (currentUser.roleType === UserRoleTypesEnum.Admin) {
-      return this.prisma.teacherToStudent.create({
+      return (await this.prisma.teacherToStudent.create({
         data: {
           teacherId: form.teacherId,
           studentId: form.studentId,
@@ -59,10 +59,8 @@ export class ConnectionsService {
             select: {
               User: {
                 include: {
-                  Teacher: {
-                    select: { institution: true, post: true, Subjects: true },
-                  },
-                  UserRole: { select: { title: true, type: true } },
+                  Teacher: { include: { Subjects: true } },
+                  UserRole: true,
                 },
               },
             },
@@ -70,18 +68,15 @@ export class ConnectionsService {
           Student: {
             select: {
               User: {
-                include: {
-                  Student: { select: { institution: true, birthDate: true } },
-                  UserRole: { select: { title: true, type: true } },
-                },
+                include: { Student: true, UserRole: true },
               },
             },
           },
         },
-      }) as unknown as ITeacherToStudentModel;
+      })) as ITeacherToStudentModel;
     }
 
-    return this.prisma.teacherToStudent.create({
+    return (await this.prisma.teacherToStudent.create({
       data: {
         teacherId: form.teacherId,
         studentId: form.studentId,
@@ -95,10 +90,8 @@ export class ConnectionsService {
           select: {
             User: {
               include: {
-                Teacher: {
-                  select: { institution: true, post: true, Subjects: true },
-                },
-                UserRole: { select: { title: true, type: true } },
+                Teacher: { include: { Subjects: true } },
+                UserRole: true,
               },
             },
           },
@@ -106,22 +99,19 @@ export class ConnectionsService {
         Student: {
           select: {
             User: {
-              include: {
-                Student: { select: { institution: true, birthDate: true } },
-                UserRole: { select: { title: true, type: true } },
-              },
+              include: { Student: true, UserRole: true },
             },
           },
         },
       },
-    }) as unknown as ITeacherToStudentModel;
+    })) as ITeacherToStudentModel;
   }
 
   public async findAllTeacherToStudent(query: TeacherToStudentQueryDto) {
     const take = query.pageSize || 10;
     const skip = ((query.pageNumber || 1) - 1) * take;
 
-    const models = await this.prisma.teacherToStudent.findMany({
+    const models = (await this.prisma.teacherToStudent.findMany({
       where: {
         teacherId: query.teacherId,
         studentId: query.studentId,
@@ -132,9 +122,7 @@ export class ConnectionsService {
           select: {
             User: {
               include: {
-                Teacher: {
-                  select: { institution: true, post: true, Subjects: true },
-                },
+                Teacher: { include: { Subjects: true } },
                 UserRole: { select: { title: true, type: true } },
               },
             },
@@ -143,17 +131,14 @@ export class ConnectionsService {
         Student: query.teacherId && {
           select: {
             User: {
-              include: {
-                Student: { select: { institution: true, birthDate: true } },
-                UserRole: { select: { title: true, type: true } },
-              },
+              include: { Student: true, UserRole: true },
             },
           },
         },
       },
       take: take,
       skip: skip,
-    });
+    })) as ITeacherToStudentModel[];
 
     let remaining = await this.prisma.teacherToStudent.count({
       where: {
@@ -175,10 +160,8 @@ export class ConnectionsService {
           select: {
             User: {
               include: {
-                Teacher: {
-                  select: { institution: true, post: true, Subjects: true },
-                },
-                UserRole: { select: { title: true, type: true } },
+                Teacher: { include: { Subjects: true } },
+                UserRole: true,
               },
             },
           },
@@ -186,10 +169,7 @@ export class ConnectionsService {
         Student: {
           select: {
             User: {
-              include: {
-                Student: { select: { institution: true, birthDate: true } },
-                UserRole: { select: { title: true, type: true } },
-              },
+              include: { Student: true, UserRole: true },
             },
           },
         },
@@ -199,7 +179,7 @@ export class ConnectionsService {
     if (!teacherToStudent) {
       throw new BadRequestException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound + `teacher-to-student ${id}`,
+        message: ErrorCodesEnum.NotFound + `teacher-to-student with id - ${id}`,
       });
     }
 
@@ -211,97 +191,56 @@ export class ConnectionsService {
     currentUser: PayloadAccessDto,
   ) {
     try {
-      if (currentUser.roleType === UserRoleTypesEnum.Admin) {
-        return (await this.prisma.teacherToStudent.update({
-          where: {
-            id: id,
-            confirmationStatus: { not: TeacherToStudentStatusesEnum.Confirmed },
-          },
-          data: { confirmationStatus: TeacherToStudentStatusesEnum.Confirmed },
-          include: {
-            Teacher: {
-              select: {
-                User: {
-                  include: {
-                    Teacher: {
-                      select: { institution: true, post: true, Subjects: true },
-                    },
-                    UserRole: { select: { title: true, type: true } },
-                  },
-                },
-              },
-            },
-            Student: {
-              select: {
-                User: {
-                  include: {
-                    Student: { select: { institution: true, birthDate: true } },
-                    UserRole: { select: { title: true, type: true } },
-                  },
-                },
-              },
-            },
-          },
-        })) as ITeacherToStudentModel;
-      }
+      return (await this.prisma.teacherToStudent.update({
+        where: {
+          id: id,
+          confirmationStatus: (function () {
+            switch (currentUser.roleType) {
+              case UserRoleTypesEnum.Admin: {
+                return { not: TeacherToStudentStatusesEnum.Confirmed };
+              }
 
-      if (currentUser.roleType === UserRoleTypesEnum.Teacher) {
-        return (await this.prisma.teacherToStudent.update({
-          where: {
-            id: id,
-            teacherId: currentUser.id,
-            confirmationStatus:
-              TeacherToStudentStatusesEnum.NeedsTeacherConfirmation,
-          },
-          data: { confirmationStatus: TeacherToStudentStatusesEnum.Confirmed },
-          include: {
-            Student: {
-              select: {
-                User: {
-                  include: {
-                    Student: { select: { institution: true, birthDate: true } },
-                    UserRole: { select: { title: true, type: true } },
-                  },
+              case UserRoleTypesEnum.Teacher: {
+                return TeacherToStudentStatusesEnum.NeedsTeacherConfirmation;
+              }
+
+              case UserRoleTypesEnum.Student: {
+                return TeacherToStudentStatusesEnum.NeedsStudentConfirmation;
+              }
+
+              default: {
+                throw new Error('Unknown role type');
+              }
+            }
+          })(),
+        },
+        data: { confirmationStatus: TeacherToStudentStatusesEnum.Confirmed },
+        include: {
+          Teacher: {
+            select: {
+              User: {
+                include: {
+                  Teacher: { include: { Subjects: true } },
+                  UserRole: true,
                 },
               },
             },
           },
-        })) as ITeacherToStudentModel;
-      }
-
-      if (currentUser.roleType === UserRoleTypesEnum.Student) {
-        return (await this.prisma.teacherToStudent.update({
-          where: {
-            id: id,
-            studentId: currentUser.id,
-            confirmationStatus:
-              TeacherToStudentStatusesEnum.NeedsStudentConfirmation,
-          },
-          data: { confirmationStatus: TeacherToStudentStatusesEnum.Confirmed },
-          include: {
-            Teacher: {
-              select: {
-                User: {
-                  include: {
-                    Teacher: {
-                      select: { institution: true, post: true, Subjects: true },
-                    },
-                    UserRole: { select: { title: true, type: true } },
-                  },
-                },
+          Student: {
+            select: {
+              User: {
+                include: { Student: true, UserRole: true },
               },
             },
           },
-        })) as ITeacherToStudentModel;
-      }
-
-      throw new Error('Unknown role type');
+        },
+      })) as ITeacherToStudentModel;
     } catch {
       throw new BadRequestException({
         statusCode: 404,
         message:
           ErrorCodesEnum.NotFound +
-          `teacher-to-student with id ${id} that needs your confirmation`,
+          `teacher-to-student with id - ${id} that needs your confirmation`,
       });
     }
   }
@@ -311,87 +250,54 @@ export class ConnectionsService {
     currentUser: PayloadAccessDto,
   ) {
     try {
-      if (currentUser.roleType === UserRoleTypesEnum.Admin) {
-        return (await this.prisma.teacherToStudent.delete({
-          where: {
-            id: id,
-          },
-          include: {
-            Teacher: {
-              select: {
-                User: {
-                  include: {
-                    Teacher: {
-                      select: { institution: true, post: true, Subjects: true },
-                    },
-                    UserRole: { select: { title: true, type: true } },
-                  },
-                },
-              },
-            },
-            Student: {
-              select: {
-                User: {
-                  include: {
-                    Student: { select: { institution: true, birthDate: true } },
-                    UserRole: { select: { title: true, type: true } },
-                  },
-                },
-              },
-            },
-          },
-        })) as ITeacherToStudentModel;
-      }
+      return (await this.prisma.teacherToStudent.delete({
+        // where: {
+        //   id: id,
+        // },
+        where: (function () {
+          switch (currentUser.roleType) {
+            case UserRoleTypesEnum.Admin: {
+              return { id: id };
+            }
 
-      if (currentUser.roleType === UserRoleTypesEnum.Teacher) {
-        return (await this.prisma.teacherToStudent.delete({
-          where: {
-            id: id,
-            teacherId: currentUser.id,
-          },
-          include: {
-            Student: {
-              select: {
-                User: {
-                  include: {
-                    Student: { select: { institution: true, birthDate: true } },
-                    UserRole: { select: { title: true, type: true } },
-                  },
+            case UserRoleTypesEnum.Teacher: {
+              return { id: id, teacherId: currentUser.id };
+            }
+
+            case UserRoleTypesEnum.Student: {
+              return { id: id, studentId: currentUser.id };
+            }
+
+            default: {
+              throw new Error('Unknown role type');
+            }
+          }
+          return;
+        })(),
+        include: {
+          Teacher: {
+            select: {
+              User: {
+                include: {
+                  Teacher: { select: { Subjects: true } },
+                  UserRole: { select: { title: true, type: true } },
                 },
               },
             },
           },
-        })) as ITeacherToStudentModel;
-      }
-
-      if (currentUser.roleType === UserRoleTypesEnum.Student) {
-        return (await this.prisma.teacherToStudent.delete({
-          where: {
-            id: id,
-            studentId: currentUser.id,
-          },
-          include: {
-            Teacher: {
-              select: {
-                User: {
-                  include: {
-                    Teacher: {
-                      select: { institution: true, post: true, Subjects: true },
-                    },
-                    UserRole: { select: { title: true, type: true } },
-                  },
-                },
+          Student: {
+            select: {
+              User: {
+                include: { Student: true, UserRole: true },
               },
             },
           },
-        })) as ITeacherToStudentModel;
-      }
-
-      throw new Error('Unknown role type');
+        },
+      })) as ITeacherToStudentModel;
     } catch {
       throw new BadRequestException({
         statusCode: 404,
-        message: ErrorCodesEnum.NotFound + `teacher-to-student with id ${id}`,
+        message: ErrorCodesEnum.NotFound + `teacher-to-student with id - ${id}`,
       });
     }
   }

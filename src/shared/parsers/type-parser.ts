@@ -31,9 +31,21 @@ export class TypeParser {
     return uuidV4Pattern.test(value) ? value : undefined;
   }
 
+  public static toUniqueUuidV4Array(value: string): string[] {
+    const uuidV4ArrayPattern =
+      /\b[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}\b/g;
+    const match = value.match(uuidV4ArrayPattern);
+    if (match && match.length) {
+      return Array.from(new Set(match));
+    }
+
+    return undefined;
+  }
+
   public static toUniqueLowercaseArray(value: string): string[] {
     const arrayPattern = /\[(.*?)\]/;
     const match = arrayPattern.exec(value);
+    console.log(value.match(arrayPattern));
     if (match && match.length > 1) {
       const array = match[1].split(',').map((item) => item.trim());
 
